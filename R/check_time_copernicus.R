@@ -20,41 +20,40 @@
 #' check_time_copernicus('NDVI_V2','2010-01-01','2014-12-31')
 #'
 #' @export
-check_time_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR", 
+check_time_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR",
     "VCI", "VPI", "DMP", "BA"), begin, end) {
-    
+
     product <- match.arg(product)
-    
-    if (length(begin) != 1 | length(end) != 1) 
+    if (length(begin) != 1 | length(end) != 1)
         stop("'begin' and 'end' should be of length 1")
-    
-    if (!lubridate::is.Date(begin)) 
+
+    if (!lubridate::is.Date(begin))
         begin <- as.Date(lubridate::parse_date_time(begin, orders = c("ymd", "yj")))
-    
-    if (!lubridate::is.Date(end)) 
+
+    if (!lubridate::is.Date(end))
         end <- as.Date(lubridate::parse_date_time(end, orders = c("ymd", "yj")))
-    
-    b <- c(NDVI_V1 = "12/1998", NDVI_V2 = "01/2013", LAI = "12/1998", FCOVER = "12/1998", FAPAR = "12/1998", 
+
+    b <- c(NDVI_V1 = "12/1998", NDVI_V2 = "01/2013", LAI = "12/1998", FCOVER = "12/1998", FAPAR = "12/1998",
         VCI = "01/2013", VPI = "01/2013", DMP = "01/2013", BA = "04/1999")  # begin dates for each product
-    e <- c(NDVI_V1 = "04/2014", NDVI_V2 = "08/2015", LAI = "07/2015", FCOVER = "07/2015", FAPAR = "07/2015", 
+    e <- c(NDVI_V1 = "04/2014", NDVI_V2 = "08/2015", LAI = "07/2015", FCOVER = "07/2015", FAPAR = "07/2015",
         VCI = "08/2015", VPI = "08/2015", DMP = "01/2013", BA = "08/2015")  # end dates for each product
-    
+
     b <- b[product]
     e <- e[product]
-    
+
     b <- as.Date(lubridate::parse_date_time(b, "%m/%y"))
     e <- as.Date(lubridate::parse_date_time(e, "%m/%y"))
-    
+
     if (begin < b) {
         begin <- b
-        warning(paste0("begin date is before than the older available date for the product. It is changed to: ", 
+        warning(paste0("begin date is before than the older available date for the product. It is changed to: ",
             begin))
     }
-    
+
     if (end > e) {
         end <- e
-        warning(paste0("end date is after than the latest available date for the product. It is changed to: ", 
+        warning(paste0("end date is after than the latest available date for the product. It is changed to: ",
             end))
     }
     list(begin = begin, end = end)
-} 
+}
