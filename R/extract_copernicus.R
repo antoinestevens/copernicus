@@ -130,7 +130,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
 
     cat("Output Directory = ", outPath, "\n")
 
-    f_h5 <- foreach(j = iterators::icount(), f = fnames, .combine = c)%do%{
+    f_h5 <- foreach(f = iterators::iter(fnames), .combine = c)%do%{
 
         finfo <- scan_file_copernicus(f)
 
@@ -146,12 +146,13 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
         f_h5 <- paste0(outPath, "/", basename(f_h5))
         h5info <- rhdf5::h5ls(f_h5, all = T)
         ginfo <- gdalUtils::gdalinfo(f_h5)
-        LAT <- as.numeric(sub(".+=", "", stringr::str_subset(ginfo, "LAT")))
-        LONG <- as.numeric(sub(".+=", "", stringr::str_subset(ginfo, "LONG")))
-        instrument <- sub(".+=", "", stringr::str_subset(ginfo, "INSTRUMENT_ID"))
-        satellite <- sub(".+=", "", stringr::str_subset(ginfo, "SATELLITE"))
-        # HV <- sub('.+=','',stringr::str_subset(ginfo,'REGION_NAME')) d <-
-        # as.Date(ymd(sub('.+=','',stringr::str_subset(ginfo,'TEMPORAL_START'))))
+
+        LAT <- stringr::str_subset(ginfo, "LAT") %>% stringr::str_replace(".+=", "") %>% as.numeric
+        LONG <- stringr::str_subset(ginfo, "LONG") %>% stringr::str_replace(".+=", "") %>% as.numeric
+        instrument <- stringr::str_subset(ginfo, "INSTRUMENT_ID") %>% stringr::str_replace(".+=", "")
+        satellite <- stringr::str_subset(ginfo, "SATELLITE") %>% stringr::str_replace(".+=", "")
+        # HV <- sub('.+=','',stringr::str_subset(ginfo,'REGION_NAME'))
+        # d <- as.Date(ymd(sub('.+=','',stringr::str_subset(ginfo,'TEMPORAL_START'))))
 
         # bounding coordinates
         e_tile <- extent(c(LONG, LONG + 10, LAT - 10, LAT))

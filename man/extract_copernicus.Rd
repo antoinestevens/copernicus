@@ -12,7 +12,7 @@ extract_copernicus(fnames,extent,extend,convertDN = TRUE,outProj,pixelSize,resam
 
 \item{extent}{A \code{\link[raster]{Raster-class}}, \code{\link[raster]{Extent}} or \code{\link[sp]{SpatialPolygons-class}} giving the subwindow to crop the image to.
 If this is an \code{\link[raster]{Extent}} object, it is assumed to be in geographical coordinates.
-Else, the projection info of the object is used to project the image to the same projection. Should be within the extent of the tile}
+Else, the projection info of the object is used to project the image to the same projection.}
 
 \item{extend}{numeric vector of length 1 or 2 (nrow,ncol). Extend the spatial extent of the subwindows (extent argument) by a given number of (rows,cols)}
 
