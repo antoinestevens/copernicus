@@ -47,7 +47,8 @@ get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', ti
 # one could also use an extent object, instead of (tileH,tileV) pairs, eg:
 library(raster)
 e <- extent(c(-1,2,49,51))
-get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-311', extent = e)
+# this will download 12 files (4 tiles x 3 time periods)
+get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', extent = e)
 }
 }
 \author{

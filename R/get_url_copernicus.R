@@ -2,7 +2,7 @@
 #' @description
 #' Get COPERNICUS url's for a given product, tile, and period of time
 #' @usage
-#' get_url_copernicus(product,begin,end,tileH,tileV,server,check_version = FALSE)
+#' get_url_copernicus(product,begin,end,tileH,tileV,groupByDate,server,check_version = FALSE)
 #' @param product one of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 #' 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 #' 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)
@@ -10,6 +10,7 @@
 #' @param end end of the time serie. Same format as \code{begin}
 #' @param tileH H index of the tile COPERNICUS system (\code{numeric} or \code{character})
 #' @param tileV V index of the tile COPERNICUS system (\code{numeric} or \code{character})
+#' @param groupByDate logical value indicating whether to return a list of vector with url's grouped by date, or a vector of url's. Default is \code{FALSE}.
 #' @param server url of the COPERNICUS data server. Default to 'http://land.copernicus.vgt.vito.be/PDF///datapool/Vegetation/', see 'copernicus_options('server')'
 #' @param check_version logical value indicating whether the algorithm version should be checked on the server data portal. Default to FALSE. See \code{\link{check_version_copernicus}}
 #' @return
@@ -21,7 +22,7 @@
 #'
 #' @export
 get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR",
-    "VCI", "VPI", "DMP", "BA"), begin, end, tileH, tileV, server = copernicus_options("server"),
+    "VCI", "VPI", "DMP", "BA"), begin, end, tileH, tileV, groupByDate = FALSE, server = copernicus_options("server"),
     check_version = FALSE) {
 
     product <- match.arg(product)
@@ -102,6 +103,10 @@ get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER"
         version, ".zip")
 
     # get final urls
+    restore.point("gfhhhjkqq")
     urls <- paste(url, y, m, d, folder_name, product_name, sep = "/")
+    if(groupByDate)
+      urls <- split(urls,lubridate::ymd(paste(y,m,d)))
+
     return(urls)
 }

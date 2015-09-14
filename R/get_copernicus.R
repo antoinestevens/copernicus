@@ -75,7 +75,9 @@ get_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "F
     ch_time <- check_time_copernicus(product = product, begin = begin, end = end)
 
     # get file url's
-    urls <- get_url_copernicus(product, ch_time$begin, ch_time$end, tileH = tiles$h, tileV = tiles$v)
+    urls <- get_url_copernicus(product, ch_time$begin, ch_time$end, tileH = tiles$h, tileV = tiles$v, groupByDate = TRUE)
+
+    # Set password and user name
     h <- curl::new_handle()
     curl::handle_setopt(h, username = user, password = password)
 
@@ -83,9 +85,12 @@ get_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "F
     if (!dir.exists(outPath))
         dir.create(outPath, showWarnings = FALSE, recursive = TRUE)
 
-    destfiles <- stringr::str_match(urls, ".+/(.+\\.zip$)")[, 2]
+    destfiles <- lapply(urls, basename)
 
-    id <- !destfiles %in% list.files(outPath)  # download only those that are not in the output directory
+    urls <- unlist(urls)
+    dest <- unlist(destfiles)
+
+    id <- !dest %in% list.files(outPath)  # download only those that are not in the output directory
 
     print(paste0(sum(id), " files will be downloaded!"))
 
@@ -93,10 +98,10 @@ get_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "F
 
     if (length(urls)) {
         foreach(i = 1:length(urls))%do%{
-            print(paste("Downloading:", destfiles[id][i]))
+            print(paste("Downloading:", dest[id][i]))
             # download data
-            curl::curl_download(url = urls[i], dest = paste0(outPath, "/", destfiles[id][i]), handle = h)
+            curl::curl_download(url = urls[i], dest = paste0(outPath, "/", dest[id][i]), handle = h)
         }
     }
-    return(invisible(paste0(outPath,"/",destfiles)))
+    return(invisible(lapply(destfiles,function(x)paste0(outPath,"/",x))))
 }

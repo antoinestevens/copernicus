@@ -4,7 +4,7 @@
 \alias{get_url_copernicus}
 \title{Get url's of COPERNICUS products}
 \usage{
-get_url_copernicus(product,begin,end,tileH,tileV,server,check_version = FALSE)
+get_url_copernicus(product,begin,end,tileH,tileV,groupByDate,server,check_version = FALSE)
 }
 \arguments{
 \item{product}{one of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
@@ -18,6 +18,8 @@ get_url_copernicus(product,begin,end,tileH,tileV,server,check_version = FALSE)
 \item{tileH}{H index of the tile COPERNICUS system (\code{numeric} or \code{character})}
 
 \item{tileV}{V index of the tile COPERNICUS system (\code{numeric} or \code{character})}
+
+\item{groupByDate}{logical value indicating whether to return a list of vector with url's grouped by date, or a vector of url's. Default is \code{FALSE}.}
 
 \item{server}{url of the COPERNICUS data server. Default to 'http://land.copernicus.vgt.vito.be/PDF///datapool/Vegetation/', see 'copernicus_options('server')'}
 
