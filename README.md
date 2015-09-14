@@ -19,6 +19,9 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("rhdf5")
 ```
 
+File extraction and image projection is done via [GDAL](http://www.gdal.org/). GDAL can be otbtained through for instance the
+[OSGeo4W](https://trac.osgeo.org/osgeo4w/) project (windows).
+
 ## Download
 
 `get_copernicus` wil download zip files on the data portal based on an extent or given tiles (h,v) pairs and a product name.

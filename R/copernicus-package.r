@@ -21,7 +21,8 @@
 #' @section Extracting:
 #' File conversion can be done with \code{\link{extract_copernicus}}, which will transfrom raw h5 files to tif, by converting DN to physical values
 #' using the associated gain and offset of each product. The function can further subset data on a given extent, resample to a given resolution
-#' and project to a given coordinate system. One can also choose which layers of the h5 files can be extracted.
+#' and project to a given coordinate system. One can also choose which layers of the h5 files can be extracted. This function requires to
+#' install GDAL.
 #' Quality Flags can be extracted with \code{\link{convert_qf_copernicus}}.
 #'
 #' @section Package options:
