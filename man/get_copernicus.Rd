@@ -4,7 +4,7 @@
 \alias{get_copernicus}
 \title{Download COPERNICUS products}
 \usage{
-get_copernicus(product,begin,end,tileH,tileV,outPath,user,password)
+get_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password)
 }
 \arguments{
 \item{product}{One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
@@ -19,6 +19,9 @@ get_copernicus(product,begin,end,tileH,tileV,outPath,user,password)
 
 \item{tileV}{V index of the tile COPERNICUS system (\code{numeric} or \code{character})}
 
+\item{extent}{an object of class \code{Raster*}, \code{Extent} or \code{SpatialPolygons*} giving the extent from which tiles should be downloaded.
+See \code{\link{get_tile_copernicus}} for details.}
+
 \item{outPath}{Path where downloaded files should be stored. Default set via \code{copernicus_options('downloadPath')}}
 
 \item{user}{user name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}}
@@ -32,14 +35,19 @@ Return invisibly the list of downloaded files
 Download COPERNICUS products, for a given period of time and tile(s)
 }
 \details{
-If target files are already present in the \code{outPath} directory, they are not downloaded
+If target files are already present in the \code{outPath} directory, they are not downloaded.
+One should choose to use either an extent or pairs of (H,V) values. If extent is provided, tileH and tileV are not used.
 }
 \examples{
 \dontrun{
 # Don't forget to provide in copernicus_options() your user and password
 # for COPERNICUS data portal before running this
-# this will download a lot of data!
-get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2014-05-31', tileH = 19, tileV = 4)
+# Let's download NDVI V1 prodct, for JUN 2009, and tile (h=19,v=4)
+get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', tileH = 19, tileV = 4)
+# one could also use an extent object, instead of (tileH,tileV) pairs, eg:
+library(raster)
+e <- extent(c(-1,2,49,51))
+get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-311', extent = e)
 }
 }
 \author{
