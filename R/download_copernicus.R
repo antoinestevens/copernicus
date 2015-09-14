@@ -2,7 +2,7 @@
 #' @description
 #' Download COPERNICUS products, for a given period of time and tile(s)
 #' @usage
-#' get_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password)
+#' download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password)
 #' @param product One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 #' 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 #' 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)
@@ -24,16 +24,16 @@
 #' # Don't forget to provide in copernicus_options() your user and password
 #' # for COPERNICUS data portal before running this
 #' # Let's download NDVI V1 prodct, for JUN 2009, and tile (h=19,v=4)
-#' get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', tileH = 19, tileV = 4)
+#' download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', tileH = 19, tileV = 4)
 #' # one could also use an extent object, instead of (tileH,tileV) pairs, eg:
 #' library(raster)
 #' e <- extent(c(-1,2,49,51))
 #' # this will download 12 files (4 tiles x 3 time periods)
-#' get_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', extent = e)
+#' download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', extent = e)
 #' }
 #'
 #' @export
-get_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR", "VCI",
+download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR", "VCI",
     "VPI", "DMP", "BA"), begin, end, tileH, tileV, extent, outPath = copernicus_options("downloadPath"),
     user = copernicus_options("user"), password = copernicus_options("password")) {
 

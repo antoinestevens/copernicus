@@ -28,7 +28,7 @@
 #' # for COPERNICUS data portal before running this
 #' # e.g. : copernicus_options(user = "Smith", password = "hello")
 #' # First, get data: NDVI_V1, for JAN 2009
-#' fn <- get_copernicus(product = 'NDVI_V1', begin = '2009-01-01', end = '2009-01-31',
+#' fn <- download_copernicus(product = 'NDVI_V1', begin = '2009-01-01', end = '2009-01-31',
 #'                      tileH = 19, tileV = 4)
 #' fn # downloaded file names
 #' # extract layers 1,2,3 of the downladed file. Store images in the 'H19V4' folder
@@ -204,20 +204,20 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
         cat(paste0("Extracting: ", basename(f_h5)))
         cat("\n Layers: \n")
 
-        foreach(it = iterators::iter(h5info, by = "row"), i = iterators::iter(layers))%do%{
-            att <- rhdf5::h5readAttributes(f_h5, it$name)
+        foreach(layer = iterators::iter(h5info, by = "row"), sd_index = iterators::iter(layers))%do%{
+            att <- rhdf5::h5readAttributes(f_h5, layer$name)
             rhdf5::H5close()
 
-            cat(paste0("- ", it$name, "\n"))
+            cat(paste0("- ", layer$name, "\n"))
 
             dst_dataset <- sub("\\.grd$", ".tif", rasterTmpFile())
             # http://land.copernicus.eu/global/faq/how-convert-swi-hdf5-data-geotiff
             if (is.null(e))
-                r <- gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = i,
+                r <- gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = sd_index,
                   output_Raster = T, a_ullr = e_tile_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
                   a_nodate = as.numeric(att$MISSING_VALUE))
             else
-               r <- gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = i,
+               r <- gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = sd_index,
                 output_Raster = T, srcwin = srcwin, a_ullr = e_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
                 a_nodate = as.numeric(att$MISSING_VALUE))
 
@@ -271,7 +271,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 names(r2) <- paste0(names(r), "_flag")
                 # write to disk
                 rgdal::writeGDAL(as(r2, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_",
-                  it$name, "_flag.tif"), f_h5), catNames = r2_lev, type = "Byte", mvFlag = 255)
+                  layer$name, "_flag.tif"), f_h5), catNames = r2_lev, type = "Byte", mvFlag = 255)
             }
             # convert DN to biophysical values see GIO-GL1_PUM_NDV1V1_I1.00.pdf pg 26 and copernicus
             # website: eg: http://land.copernicus.eu/global/products/ndvi?qt-ndvi_characteristics=5 The
@@ -285,7 +285,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 r <- (r - as.numeric(att$OFFSET))/as.numeric(att$SCALING_FACTOR)
             }
             # write to disk
-            rgdal::writeGDAL(as(r, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_", it$name,
+            rgdal::writeGDAL(as(r, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_", layer$name,
                 ".tif"), f_h5))
         }
 

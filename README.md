@@ -24,7 +24,7 @@ File extraction and image projection is done via [GDAL](http://www.gdal.org/). G
 
 ## Download
 
-`get_copernicus` wil download zip files on the data portal based on an extent or given tiles (h,v) pairs and a product name.
+`download_copernicus` wil download zip files on the data portal based on an extent or given tiles (h,v) pairs and a product name.
 Only the following products are available:  `NDVI_V1` (Normalized Difference Vegetation Index - VGT instrument),
 `NDVI_V2` (Normalized Difference Vegetation Index - PROBAV instrument),`LAI` (Leaf Area Index),`FCOVER` (Fraction of Vegetation Green Cover),
 `FAPAR` (Fraction of Absorbed Photosynthetically Active Radiation),`VCI` (Vegetation Condition Index),`VPI` (Vegetation Productivity Index),
