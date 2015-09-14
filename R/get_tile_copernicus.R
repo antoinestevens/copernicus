@@ -71,7 +71,7 @@ get_tile_copernicus <- function(extent, tileH, tileV, ...) {
         if (is.na(proj4string(extent)))
             proj4string(extent) <- proj4string(tiles)
 
-        result <- over(extent, tiles, returnList = T)[[1]]
+        result <- tiles@data[rgeos::gIntersects(extent, tiles, byid = TRUE),]
     } else {
 
         if (missing(tileV))
