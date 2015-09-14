@@ -2,7 +2,7 @@
 #' @description
 #' Download COPERNICUS products, for a given period of time and tile(s)
 #' @usage
-#' download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password)
+#' download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password,...)
 #' @param product One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 #' 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 #' 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)
@@ -15,6 +15,7 @@
 #' @param outPath Path where downloaded files should be stored. Default set via \code{copernicus_options('downloadPath')}
 #' @param user user name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}
 #' @param password password associated with user name to access COPERNICUS data portal. Default set via \code{copernicus_options('password')}
+#' @param ... argument passed to \code{\link{get_url_copernicus}}, such as groupByDate
 #' @details If target files are already present in the \code{outPath} directory, they are not downloaded.
 #' One should choose to use either an extent or pairs of (H,V) values. If extent is provided, tileH and tileV are not used.
 #' @return Return invisibly the list of downloaded files
@@ -35,7 +36,7 @@
 #' @export
 download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR", "VCI",
     "VPI", "DMP", "BA"), begin, end, tileH, tileV, extent, outPath = copernicus_options("downloadPath"),
-    user = copernicus_options("user"), password = copernicus_options("password")) {
+    user = copernicus_options("user"), password = copernicus_options("password"),...) {
 
     if (copernicus_options("user") == "" | copernicus_options("password") == "")
         stop("Set a user and password via 'copernicus_options()' to access COPERNICUS data portal")
@@ -75,7 +76,7 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     ch_time <- check_time_copernicus(product = product, begin = begin, end = end)
 
     # get file url's
-    urls <- get_url_copernicus(product, ch_time$begin, ch_time$end, tileH = tiles$h, tileV = tiles$v, groupByDate = TRUE)
+    urls <- get_url_copernicus(product, ch_time$begin, ch_time$end, tileH = tiles$h, tileV = tiles$v, ...)
 
     # Set password and user name
     h <- curl::new_handle()

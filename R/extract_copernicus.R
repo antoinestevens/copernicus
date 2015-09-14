@@ -3,7 +3,8 @@
 #' @usage
 #' extract_copernicus(fnames,extent,extend,convertDN = TRUE,outProj,pixelSize,resamplingType,
 #'                    outPath,job,gdalPath,zip = TRUE,layers = 1)
-#' @param fnames \code{character} vector of the file names to transform (with a zip or h5 extension)
+#' @param fnames \code{character} vector of the file names to transform (with a zip or h5 extension).
+#' If \code{fnames} is a list of vector of file names, then files are automatically mosaicked for each element of the list
 #' @param extent A \code{\link[raster]{Raster-class}}, \code{\link[raster]{Extent}} or \code{\link[sp]{SpatialPolygons-class}} giving the subwindow to crop the image to.
 #'        If this is an \code{\link[raster]{Extent}} object, it is assumed to be in geographical coordinates.
 #'        Else, the projection info of the object is used to project the image to the same projection.
@@ -20,7 +21,7 @@
 #' @param zip logical value indicating whether file(s) should be un-zipped before h5 extraction
 #' @param layers \code{numeric} vector indicating the index/indices of the layer(s) to extract from the h5 file(s). Default set to 1
 #'        See eg http://land.copernicus.eu/global/products/ndvi for more details.
-#' @return Return invisibly the list of extracted h5 files
+#' @return Return invisibly the list of extracted h5 files. If files are mosaicked, tiles numbers are dropped from the names
 #' @author Antoine Stevens
 #' @examples
 #' \dontrun{
@@ -77,6 +78,16 @@
 #'                         job = 'H19V4',layers = 2)
 #' s <- stack(sub('\\.h5','_NDVI.tif',f));s
 #' plot(s)
+#' # extract_copernicus allows also to mosaic files, by grouping file names within a list
+#' # first, download data spanning neighbouring tiles
+#' e <- extent(c(-1.5,2.5,49,51))
+#' # the groupByDate argument allows to return a list of files, grouped by date
+#' fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',extent = e,groupByDate = TRUE)
+#' # now extract
+#' f <- extract_copernicus(fnames = fn,extent = extent, layers = 2)
+#' f <- sub('\\.h5','_NDVI.tif',f)
+#' s <-stack(f)
+#' plot(s)
 #' }
 #'
 #' @export
@@ -129,150 +140,185 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
     }
 
     cat("Output Directory = ", outPath, "\n")
+    restore.point("gfgfgfgf")
+    # fnames could be a list with file names, grouped by years,
+    # so we iterate over the list and for each element of the list, again
+    f_h5 <- foreach(fgroup = iterators::iter(fnames), .combine = c)%do%{
 
-    f_h5 <- foreach(f = iterators::iter(fnames), .combine = c)%do%{
+      # the layer loop is outside, to allow mosaiking
+      # this is however not efficient, since the h5 is read several times
+      foreach(layer = iterators::iter(layers),i = iterators::icount())%do%{
 
-        finfo <- scan_file_copernicus(f)
+            src_dataset <- foreach(f = iterators::iter(fgroup),.combine = c)%do%{
 
-        if (zip) {
-            folder <- finfo[, "date"]
-            f_h5 <- extension(f, ".h5")
-            unzip(f, files = paste0(folder, "/", basename(f_h5)), exdir = sub("/$", "", outPath),
-                junkpaths = T)
-        } else {
-            f_h5 <- f
-        }
+                finfo <- scan_file_copernicus(f)
 
-        f_h5 <- paste0(outPath, "/", basename(f_h5))
-        h5info <- rhdf5::h5ls(f_h5, all = T)
-        ginfo <- gdalUtils::gdalinfo(f_h5)
+                if (zip) {
+                    folder <- finfo[, "date"]
+                    f_h5 <- extension(f, ".h5")
+                    if(i==1)
+                    unzip(f, files = paste0(folder, "/", basename(f_h5)), exdir = sub("/$", "", outPath),
+                        junkpaths = T)
+                } else {
+                    f_h5 <- f
+                }
+                f_h5 <- paste0(outPath, "/", basename(f_h5))
 
-        LAT <- stringr::str_subset(ginfo, "LAT") %>% stringr::str_replace(".+=", "") %>% as.numeric
-        LONG <- stringr::str_subset(ginfo, "LONG") %>% stringr::str_replace(".+=", "") %>% as.numeric
-        instrument <- stringr::str_subset(ginfo, "INSTRUMENT_ID") %>% stringr::str_replace(".+=", "")
-        satellite <- stringr::str_subset(ginfo, "SATELLITE") %>% stringr::str_replace(".+=", "")
-        # HV <- sub('.+=','',stringr::str_subset(ginfo,'REGION_NAME'))
-        # d <- as.Date(ymd(sub('.+=','',stringr::str_subset(ginfo,'TEMPORAL_START'))))
+                h5info <- rhdf5::h5ls(f_h5, all = T)
 
-        # bounding coordinates
-        e_tile <- extent(c(LONG, LONG + 10, LAT - 10, LAT))
-        # http://land.copernicus.eu/global/article/125sq-kilometers-burnt-south-australia 'Please
-        # note that the coordinates may be given to you for pixel centre, whereas GDAL and QGIS
-        # will expect them as pixel (outer) corners, so you may have to extend the coordinates with
-        # 1/2 pixel size in all directions. '
-        e_tile <- e_tile + (1/112)  # same as:  e_tile <- extend(e_tile,(1/112)/2)
+                ginfo <- gdalUtils::gdalinfo(f_h5)
+                LAT <- stringr::str_subset(ginfo, "LAT") %>% stringr::str_replace(".+=", "") %>% as.numeric
+                LONG <- stringr::str_subset(ginfo, "LONG") %>% stringr::str_replace(".+=", "") %>% as.numeric
+                instrument <- stringr::str_subset(ginfo, "INSTRUMENT_ID") %>% stringr::str_replace(".+=", "")
+                satellite <- stringr::str_subset(ginfo, "SATELLITE") %>% stringr::str_replace(".+=", "")
+                # HV <- sub('.+=','',stringr::str_subset(ginfo,'REGION_NAME'))
+                # d <- as.Date(ymd(sub('.+=','',stringr::str_subset(ginfo,'TEMPORAL_START'))))
 
-        # project geographical coordinates in the plate carrée system (no datum transformation)
-        # the +over argument allows longitude output outside -180 to 180 range (disables wrapping)
-        # (because one can have potentially -180 - (1/112)/2 )
-        # https://trac.osgeo.org/proj/wiki/GenParm
-        e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over")
-        if (!is.null(extent)) {
+                # bounding coordinates
+                e_tile <- extent(c(LONG, LONG + 10, LAT - 10, LAT))
+                # http://land.copernicus.eu/global/article/125sq-kilometers-burnt-south-australia 'Please
+                # note that the coordinates may be given to you for pixel centre, whereas GDAL and QGIS
+                # will expect them as pixel (outer) corners, so you may have to extend the coordinates with
+                # 1/2 pixel size in all directions. '
+                e_tile <- e_tile + (1/112)  # same as:  e_tile <- extend(e_tile,(1/112)/2)
 
-            # project to geographical coordinates if necessary
-            if (!isLonLat(t_srs)&!is.null(t_srs))
-                e <- extent(projectExtent(extent, "+init=epsg:4326")) else e <- extent(extent)
+                # project geographical coordinates in the plate carrée system (no datum transformation)
+                # the +over argument allows longitude output outside -180 to 180 range (disables wrapping)
+                # (because one can have potentially -180 - (1/112)/2 )
+                # https://trac.osgeo.org/proj/wiki/GenParm
+                e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over")
+                if (!is.null(extent)) {
 
-            # now, add row/col (or pix) at each side if requested by the user
-            if (!missing(extend)) {
+                    # project to geographical coordinates if necessary
+                    if (!isLonLat(t_srs)&!is.null(t_srs))
+                        e <- extent(projectExtent(extent, "+init=epsg:4326")) else e <- extent(extent)
 
-                if (length(extend) == 1)
-                  extend <- rep(extend, 2)
+                    # now, add row/col (or pix) at each side if requested by the user
+                    if (!missing(extend)) {
 
-                e <- extend(e, extend/112)  # add extend*(1/112) at each side (row/col)
+                        if (length(extend) == 1)
+                          extend <- rep(extend, 2)
+
+                        e <- extend(e, extend/112)  # add extend*(1/112) at each side (row/col)
+                    }
+
+                    # xy in pixels for the subwindow
+                    #  first, crop the extent to the extent of the tile
+                    e@xmin <- max(e@xmin,LONG)
+                    e@ymin <- max(e@ymin,LAT - 10)
+                    e@xmax <- min(e@xmax,LONG + 10)
+                    e@ymax <- min(e@ymax,LAT)
+
+                    srcwin <- c(e@xmin - LONG, LAT  - e@ymax, e@xmax - e@xmin, e@ymax - e@ymin) * 112  # crop
+
+                    # extend subwindow by a demi pixel for @xmin and @ymin, but reduce by a demi pixel (only
+                    # 112 pixels are kept here, not 113!) for @xmax, @ymax!
+                    e[1:4] <- e[1:4] - (1/112)/2
+                    # project the subwindow
+                    e_proj <- rgdal::project(as.matrix(e), "+init=epsg:32662 +over")
+                } else {
+                    e <- NULL
+                }
+
+                h5info <- h5info[layer, ]  # extract the selected layers only
+
+
+                att <- rhdf5::h5readAttributes(f_h5, h5info$name)
+                rhdf5::H5close()
+
+                cat(paste0("Extracting: ", basename(f_h5)))
+                cat("\n Layer: \n")
+                cat(paste0(h5info$name, "\n"))
+
+
+                dst_dataset <- sub("\\.grd$", ".tif", rasterTmpFile())
+                # http://land.copernicus.eu/global/faq/how-convert-swi-hdf5-data-geotiff
+                if (is.null(e))
+                   gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = layer,
+                      a_ullr = e_tile_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
+                      a_nodate = as.numeric(att$MISSING_VALUE))
+                else
+                   gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = layer,
+                    srcwin = srcwin, a_ullr = e_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
+                    a_nodate = as.numeric(att$MISSING_VALUE))
+
+                # cleaning
+                if (zip&i==length(layers))
+                  unlink(f_h5)
+
+                dst_dataset
             }
 
-            # xy in pixels for the subwindow
-            #  first, crop the extent to the extent of the tile
-            e@xmin <- max(e@xmin,LONG)
-            e@ymin <- max(e@ymin,LAT - 10)
-            e@xmax <- min(e@xmax,LONG + 10)
-            e@ymax <- min(e@ymax,LAT)
-
-            srcwin <- c(e@xmin - LONG, e@ymin - (LAT - 10), e@xmax - e@xmin, e@ymax - e@ymin) * 112  # crop
-
-            # extend subwindow by a demi pixel for @xmin and @ymin, but reduce by a demi pixel (only
-            # 112 pixels are kept here, not 113!) for @xmax, @ymax!
-            e[1:4] <- e[1:4] - (1/112)/2
-            # project the subwindow
-            e_proj <- rgdal::project(as.matrix(e), "+init=epsg:32662 +over")
-        } else {
-            e <- NULL
-        }
-
-        h5info <- h5info[layers, ]  # extract the selected layers only
-        cat(paste0("Extracting: ", basename(f_h5)))
-        cat("\n Layers: \n")
-
-        foreach(layer = iterators::iter(h5info, by = "row"), sd_index = iterators::iter(layers))%do%{
-            att <- rhdf5::h5readAttributes(f_h5, layer$name)
-            rhdf5::H5close()
-
-            cat(paste0("- ", layer$name, "\n"))
-
-            dst_dataset <- sub("\\.grd$", ".tif", rasterTmpFile())
-            # http://land.copernicus.eu/global/faq/how-convert-swi-hdf5-data-geotiff
-            if (is.null(e))
-                r <- gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = sd_index,
-                  output_Raster = T, a_ullr = e_tile_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
-                  a_nodate = as.numeric(att$MISSING_VALUE))
-            else
-               r <- gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = sd_index,
-                output_Raster = T, srcwin = srcwin, a_ullr = e_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
-                a_nodate = as.numeric(att$MISSING_VALUE))
+            # change the name of f_h5 if mosaiking
+            # removing the tile info
+            if(length(src_dataset)>1){
+              ftmp <- scan_file_copernicus(fgroup)[1,]
+              f_h5 <- paste0(outPath,"/g2_BIOPAR_",ftmp$product,"_",ftmp$date,"0000_",ftmp$sensor,"_V",ftmp$version,".h5")
+            }
 
             if (!is.null(t_srs) & !is.null(tr)) {
-                r <- gdalUtils::gdalwarp(srcfile = dst_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
-                  s_srs = "+init=epsg:32662", t_srs = t_srs, tr = tr, r = resamplingType, output_Raster = T,
-                  overwrite = TRUE)
+              r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
+                                       s_srs = "+init=epsg:32662", t_srs = t_srs, tr = tr, r = resamplingType, output_Raster = T,
+                                       overwrite = TRUE)
 
             } else if (!is.null(t_srs) & is.null(tr)) {
-                r <- gdalUtils::gdalwarp(srcfile = dst_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
-                  s_srs = "+init=epsg:32662", t_srs = t_srs, r = resamplingType, output_Raster = T,
-                  overwrite = TRUE)
+              r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
+                                       s_srs = "+init=epsg:32662", t_srs = t_srs, r = resamplingType, output_Raster = T,
+                                       overwrite = TRUE)
             } else if (is.null(t_srs) & !is.null(tr)) {
-                r <- gdalUtils::gdalwarp(srcfile = dst_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
-                  s_srs = "+init=epsg:32662", tr = tr, r = resamplingType, output_Raster = T,
-                  overwrite = TRUE)
+              r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
+                                       s_srs = "+init=epsg:32662", tr = tr, r = resamplingType, output_Raster = T,
+                                       overwrite = TRUE)
+            } else if (length(src_dataset)>1) {
+              # mosaiking
+              r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
+                                       output_Raster = T,
+                                       overwrite = TRUE)
+            } else {
+              r <- raster(src_dataset[[1]])
             }
 
-            # set name1
-            names(r) <- att$PRODUCT
+            layer_name <- att$PRODUCT
+            # set name
+            names(r) <- layer_name
             # set projection
             projection(r) <- outProj
-            if (att$PRODUCT %in% c("NDVI", "LAI", "FAPAR", "FCOVER", "VPI", "VCI", "DMP")) {
-                ####################### Specific values: # NDVI V2, VPI, VCI, : 252 for cloud/shadow pixels, 253 for snow/ice,
-                ####################### 254 for sea pixels and 251/255 for invalids or data errors.  NDVI V1, LAI, FAPAR 255 for
-                ####################### invalid pixels, 253 for pixels with out of range value superior to the max physical
-                ####################### value, 254 for pixels with out of range value inferior to the minimum physical value.
-                ####################### DMP: -1 Background ; -2 Sea; -3 Snow/Ice; -4 Cloud; -5 Missing data; -257 NDVI < 0; -300
-                ####################### Missing Meteo data create a new layer with these values
-                r2 <- r
+            if (layer_name %in% c("NDVI", "LAI", "FAPAR", "FCOVER", "VPI", "VCI", "DMP")) {
+              #######################
+              # Specific values:
+              # NDVI V2, VPI, VCI, : 252 for cloud/shadow pixels, 253 for snow/ice,
+              # 254 for sea pixels and 251/255 for invalids or data errors.  NDVI V1, LAI, FAPAR 255 for
+              # invalid pixels, 253 for pixels with out of range value superior to the max physical
+              # value, 254 for pixels with out of range value inferior to the minimum physical value.
+              # DMP: -1 Background ; -2 Sea; -3 Snow/Ice; -4 Cloud; -5 Missing data; -257 NDVI < 0; -300
+              # Missing Meteo data create a new layer with these values
+              ######################
+              r2 <- r
 
-                if ((att$PRODUCT == "NDVI" & instrument == "VGT3") | att$PRODUCT %in% c("VPI",
-                  "VCI")) {
-                  # remove values outside range
-                  r <- clamp(r, upper = 250, useValues = F)
-                  r2 <- clamp(r2, lower = 251, useValues = F)
-                  r2 <- r2 - 251  # convert to zero-base index
-                  r2_lev <- list(code = c("invalid", "cloud/shadow", "snow/ice", "sea", "invalid"))
-                } else if (att$PRODUCT == "DMP") {
-                  r <- clamp(r, upper = 0, useValues = F)
-                  r2 <- clamp(r2, lower = 1, useValues = F)
-                  r2 <- subs(r2, data.frame(from = c(-300, -257, -5:-1), to = 0:6))
-                  r2_lev <- list(code = c("missing_meteo", "NDVI<0", "missing_data", "cloud",
-                    "snow/ice", "sea", "background"))
-                } else {
-                  r <- clamp(r, upper = 250, useValues = F)
-                  r2 <- clamp(r2, lower = 251, useValues = F)
-                  r2 <- r2 - 253
-                  r2_lev <- list(code = c("out_max", "out_min", "invalid"))
-                }
-                names(r2) <- paste0(names(r), "_flag")
-                # write to disk
-                rgdal::writeGDAL(as(r2, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_",
-                  layer$name, "_flag.tif"), f_h5), catNames = r2_lev, type = "Byte", mvFlag = 255)
+              if ((layer_name == "NDVI" & instrument == "VGT3") | layer_name %in% c("VPI","VCI")) {
+                # remove values outside range
+                r <- clamp(r, upper = 250, useValues = F)
+                r2 <- clamp(r2, lower = 251, useValues = F)
+                r2 <- r2 - 251  # convert to zero-base index
+                r2_lev <- list(code = c("invalid", "cloud/shadow", "snow/ice", "sea", "invalid"))
+              } else if (layer_name == "DMP") {
+                r <- clamp(r, upper = 0, useValues = F)
+                r2 <- clamp(r2, lower = 1, useValues = F)
+                r2 <- subs(r2, data.frame(from = c(-300, -257, -5:-1), to = 0:6))
+                r2_lev <- list(code = c("missing_meteo", "NDVI<0", "missing_data", "cloud",
+                                        "snow/ice", "sea", "background"))
+              } else {
+                r <- clamp(r, upper = 250, useValues = F)
+                r2 <- clamp(r2, lower = 251, useValues = F)
+                r2 <- r2 - 253
+                r2_lev <- list(code = c("out_max", "out_min", "invalid"))
+              }
+              names(r2) <- paste0(names(r), "_flag")
+              # write to disk
+              rgdal::writeGDAL(as(r2, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_",
+                        layer_name, "_flag.tif"), f_h5), catNames = r2_lev, type = "Byte", mvFlag = 255)
             }
+
             # convert DN to biophysical values see GIO-GL1_PUM_NDV1V1_I1.00.pdf pg 26 and copernicus
             # website: eg: http://land.copernicus.eu/global/products/ndvi?qt-ndvi_characteristics=5 The
             # physical values (PV) can be derived from the digital number (DN) using the relation: PV =
@@ -281,17 +327,13 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
             # c(0,0,0,-.1,-.08,0,-.125,0), max = c(7, .94, 1, .9,.92,100,1.125,327.67), maxDN =
             # c(210,235,250,250,250,210,250,32767), scaling =
             # c(1/30,1/250,1/250,1/250,1/250,1/2,0.005,0.01), offset = c(0,0,0,25,-.08,-5,0.125,0))
-            if (convertDN) {
-                r <- (r - as.numeric(att$OFFSET))/as.numeric(att$SCALING_FACTOR)
-            }
+            if (convertDN)
+              r <- (r - as.numeric(att$OFFSET))/as.numeric(att$SCALING_FACTOR)
+
             # write to disk
-            rgdal::writeGDAL(as(r, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_", layer$name,
+             rgdal::writeGDAL(as(r, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_", layer_name,
                 ".tif"), f_h5))
         }
-
-        # cleaning
-        if (zip)
-            unlink(f_h5)
         f_h5
     }
     return(invisible(f_h5))

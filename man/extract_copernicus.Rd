@@ -8,7 +8,8 @@ extract_copernicus(fnames,extent,extend,convertDN = TRUE,outProj,pixelSize,resam
                    outPath,job,gdalPath,zip = TRUE,layers = 1)
 }
 \arguments{
-\item{fnames}{\code{character} vector of the file names to transform (with a zip or h5 extension)}
+\item{fnames}{\code{character} vector of the file names to transform (with a zip or h5 extension).
+If \code{fnames} is a list of vector of file names, then files are automatically mosaicked for each element of the list}
 
 \item{extent}{A \code{\link[raster]{Raster-class}}, \code{\link[raster]{Extent}} or \code{\link[sp]{SpatialPolygons-class}} giving the subwindow to crop the image to.
 If this is an \code{\link[raster]{Extent}} object, it is assumed to be in geographical coordinates.
@@ -38,7 +39,7 @@ if the \code{extent} argument is set, with an object of class \code{\link[raster
 See eg http://land.copernicus.eu/global/products/ndvi for more details.}
 }
 \value{
-Return invisibly the list of extracted h5 files
+Return invisibly the list of extracted h5 files. If files are mosaicked, tiles numbers are dropped from the names
 }
 \description{
 Un-zip, extract the given layers of COPERNICUS h5 files to tif files. The function can also crop, project and apply gain and offset values
@@ -97,6 +98,16 @@ plot(s)
 f <- extract_copernicus(fnames = fn,outProj = '+init=epsg:32632', pixelSize = c(1000,1000),
                         job = 'H19V4',layers = 2)
 s <- stack(sub('\\\\.h5','_NDVI.tif',f));s
+plot(s)
+# extract_copernicus allows also to mosaic files, by grouping file names within a list
+# first, download data spanning neighbouring tiles
+e <- extent(c(-1.5,2.5,49,51))
+# the groupByDate argument allows to return a list of files, grouped by date
+fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',extent = e,groupByDate = TRUE)
+# now extract
+f <- extract_copernicus(fnames = fn,extent = extent, layers = 2)
+f <- sub('\\\\.h5','_NDVI.tif',f)
+s <-stack(f)
 plot(s)
 }
 }

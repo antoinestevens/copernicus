@@ -4,7 +4,7 @@
 \alias{download_copernicus}
 \title{Download COPERNICUS products}
 \usage{
-download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password)
+download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password,...)
 }
 \arguments{
 \item{product}{One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
@@ -27,6 +27,8 @@ See \code{\link{get_tile_copernicus}} for details.}
 \item{user}{user name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}}
 
 \item{password}{password associated with user name to access COPERNICUS data portal. Default set via \code{copernicus_options('password')}}
+
+\item{...}{argument passed to \code{\link{get_url_copernicus}}, such as groupByDate}
 }
 \value{
 Return invisibly the list of downloaded files
