@@ -50,7 +50,7 @@ gen_tile_copernicus <- function(poly = F, offset = (1/112)/2,exclude = TRUE) {
     if(exclude)
       hv <- hv[is.na(hv$no), ]
     else
-      hv$availability <- ifelse(is.na(hv$no),FALSE,TRUE)
+      hv$availability <- ifelse(!is.na(hv$no),FALSE,TRUE)
     hv <- subset(hv, select = -no)
     if (poly) {
         pol <- list()
