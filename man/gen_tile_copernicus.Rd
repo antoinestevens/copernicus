@@ -4,7 +4,7 @@
 \alias{gen_tile_copernicus}
 \title{Generate COPERNICUS tiling grid}
 \usage{
-gen_tile_copernicus(poly,offset)
+gen_tile_copernicus(poly,offset,exclude = TRUE)
 }
 \arguments{
 \item{poly}{logical value indicating whether the function should return a . Default set to \code{FALSE}}
@@ -12,12 +12,14 @@ gen_tile_copernicus(poly,offset)
 \item{offset}{numeric. Shift the tiling grid in the upper-left direction. Default to (1/112)/2.
 The reference position is the centre of the pixel in COPERNICUS products, while the \code{raster} package, as well as other
 GIS (eg QGIS) expect the reference of a grid to be at the upper-left corner. It means that the upper-left corner of the pixels is at  [(pixel_longitude - angular_resolution/2),(pixel_latitude + angular_resolution/2)]}
+
+\item{exclude}{logical value indicating whether to return only tiles where COPERNICUS data are available or not. Default is \code{TRUE}}
 }
 \value{
-a \code{data.frame} or \code{SpatialPolygonsDataFrame}. See \code{poly} parameter
+a \code{data.frame} or \code{SpatialPolygonsDataFrame} with h,v pairs and bounding box. See \code{poly} parameter
 }
 \description{
-Generates the COPERNICUS tiling system, excluding tiles where there are no data available
+Generates the COPERNICUS tiling system
 }
 \details{
 See also \code{\link[MODIS]{genTile}} in the MODIS package
