@@ -6,7 +6,7 @@
 #' @param fnames \code{character} vector of the file names to transform (with a zip or h5 extension)
 #' @param extent A \code{\link[raster]{Raster-class}}, \code{\link[raster]{Extent}} or \code{\link[sp]{SpatialPolygons-class}} giving the subwindow to crop the image to.
 #'        If this is an \code{\link[raster]{Extent}} object, it is assumed to be in geographical coordinates.
-#'        Else, the projection info of the object is used to project the image to the same projection. Should be within the extent of the tile
+#'        Else, the projection info of the object is used to project the image to the same projection.
 #' @param extend numeric vector of length 1 or 2 (nrow,ncol). Extend the spatial extent of the subwindows (extent argument) by a given number of (rows,cols)
 #' @param convertDN logical value indicating whether DN values should be converted to physical values (eg vegetation index). Default to TRUE
 #' @param outProj \code{character} string giving the coordinate projection system of the output in the PROJ.4 format. Default is '+init=epsg:32662' (Plate Carr\'ee, WGS84), i.e. no re-projection is done.
@@ -169,19 +169,8 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
         if (!is.null(extent)) {
 
             # project to geographical coordinates if necessary
-            if (!isLonLat(t_srs))
+            if (!isLonLat(t_srs)&!is.null(t_srs))
                 e <- extent(projectExtent(extent, "+init=epsg:4326")) else e <- extent(extent)
-
-            # xy in pixels for the subwindow
-            srcwin <- c(e@xmin - LONG, e@ymin - (LAT - 10), e@xmax - e@xmin, e@ymax - e@ymin) *
-                112  # crop
-
-            if (e[1] <= e_tile[1] | e[2] >= e_tile[2] | e[3] <= e_tile[3] | e[4] >= e_tile[4])
-                stop("Check extent of the subwindows! Should be within the Lat,Long of the tile")
-
-            # extend subwindow by a demi pixel for @xmin and @ymin, but reduce by a demi pixel (only
-            # 112 pixels are kept here, not 113!) for @xmax, @ymax!
-            e[1:4] <- e[1:4] - (1/112)/2
 
             # now, add row/col (or pix) at each side if requested by the user
             if (!missing(extend)) {
@@ -190,12 +179,20 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                   extend <- rep(extend, 2)
 
                 e <- extend(e, extend/112)  # add extend*(1/112) at each side (row/col)
-                srcwin <- c(srcwin[1] - extend[2], srcwin[2] - extend[1], srcwin[3] + (extend[2] *
-                  2), srcwin[4] + (extend[1]) * 2)
-
-                if (e[1] <= e_tile[1] | e[2] >= e_tile[2] | e[3] <= e_tile[3] | e[4] >= e_tile[4])
-                  warning("Check extend! Extent falls outside the extent of the downloaded tile")
             }
+
+            # xy in pixels for the subwindow
+            #  first, crop the extent to the extent of the tile
+            e@xmin <- max(e@xmin,LONG)
+            e@ymin <- max(e@ymin,LAT - 10)
+            e@xmax <- min(e@xmax,LONG + 10)
+            e@ymax <- min(e@ymax,LAT)
+
+            srcwin <- c(e@xmin - LONG, e@ymin - (LAT - 10), e@xmax - e@xmin, e@ymax - e@ymin) * 112  # crop
+
+            # extend subwindow by a demi pixel for @xmin and @ymin, but reduce by a demi pixel (only
+            # 112 pixels are kept here, not 113!) for @xmax, @ymax!
+            e[1:4] <- e[1:4] - (1/112)/2
             # project the subwindow
             e_proj <- rgdal::project(as.matrix(e), "+init=epsg:32662 +over")
         } else {
