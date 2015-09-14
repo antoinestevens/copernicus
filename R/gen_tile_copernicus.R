@@ -50,7 +50,7 @@ gen_tile_copernicus <- function(poly = F, offset = (1/112)/2,exclude = TRUE) {
     if(exclude)
       hv <- hv[is.na(hv$no), ]
     else
-      hv$availability <- ifelse(!is.na(hv$no),FALSE,TRUE)
+      hv$availability <- ifelse(is.na(hv$no),TRUE,FALSE)
     hv <- subset(hv, select = -no)
     if (poly) {
         pol <- list()
@@ -62,7 +62,7 @@ gen_tile_copernicus <- function(poly = F, offset = (1/112)/2,exclude = TRUE) {
         }
         # the over argument is for lat values abobe 90 and long below - 180 (that might be due to
         # the offset)
-        pol <- sp::SpatialPolygons(pol, proj4string = crs("+init=epsg:32662 +over"))
+        pol <- sp::SpatialPolygons(pol, proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +over"))
         pol <- sp::SpatialPolygonsDataFrame(Sr = pol, data = hv, match.ID = F)
         return(pol)
     } else {
