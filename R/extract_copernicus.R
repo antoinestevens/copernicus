@@ -130,7 +130,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
 
     cat("Output Directory = ", outPath, "\n")
 
-    f_h5 <- foreach(j = iterators::icount(), f = fnames, .combine = c) %do% {
+    f_h5 <- foreach(j = iterators::icount(), f = fnames, .combine = c)%do%{
 
         finfo <- scan_file_copernicus(f)
 
@@ -206,7 +206,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
         cat(paste0("Extracting: ", basename(f_h5)))
         cat("\n Layers: \n")
 
-        foreach(it = iterators::iter(h5info, by = "row"), i = iterators::iter(layers)) %do% {
+        foreach(it = iterators::iter(h5info, by = "row"), i = iterators::iter(layers))%do%{
             att <- rhdf5::h5readAttributes(f_h5, it$name)
             rhdf5::H5close()
 

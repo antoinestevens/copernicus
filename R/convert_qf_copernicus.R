@@ -47,7 +47,7 @@ convert_qf_copernicus <- function(r, qf) {
     if (!sum(q))
         stop("qf should match at least one (or possibly more) of these : c('sea','snow','suspect','aero_status_mixed','aero_source_climato','input_invalid','lai_invalid','fapar_invalid','fcover_invalid','b2_saturation','b3_saturation','filtered','gap_filled','ndvi_invalid')")
 
-    foreach(i = 1:nlayers(r), .combine = stack) %do% {
+    foreach(i = 1:nlayers(r), .combine = stack)%do%{
 
         # Bit 1: Land/Sea Land Sea Bit 2: Snow status Clear Snow Bit 3: Suspect No suspect Suspect
         # Bit 4: Aerosol status Pure Mixed Bit 5: Aerosol source Modis Climato Bit 6: Input status
