@@ -32,10 +32,7 @@
 #' Function arguments follow the same naming as in MODIS, as much as possible.
 #' @name copernicus
 #' @docType package
-#' @import foreach
+#' @import foreach raster sp rgeos
 #' @importFrom lubridate %--% %within%
 #' @importFrom magrittr %>%
-#' @import raster
-#' @import sp
-#' @import rgeos
 NULL
