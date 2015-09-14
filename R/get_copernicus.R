@@ -56,9 +56,8 @@ get_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "F
         tileH <- tileH[ch_tile]
         tileV <- tileV[ch_tile]
     }
-
     # check the availability of the provided time period
-    ch_time <- check_time_copernicus(product, begin, end)
+    ch_time <- check_time_copernicus(product = product, begin = begin, end = end)
 
     # get file url's
     urls <- get_url_copernicus(product, ch_time$begin, ch_time$end, tileH, tileV)
@@ -76,14 +75,13 @@ get_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "F
     print(paste0(sum(id), " files will be downloaded!"))
 
     urls <- urls[id]
-    destfiles = destfiles[id]
 
     if (length(urls)) {
-        foreach(i = 1:length(urls)) %do% {
-            print(paste("Downloading:", destfiles[i]))
+        foreach(i = 1:length(urls))%do%{
+            print(paste("Downloading:", destfiles[id][i]))
             # download data
-            curl::curl_download(url = urls[i], dest = paste0(outPath, "/", destfiles[i]), handle = h)
+            curl::curl_download(url = urls[i], dest = paste0(outPath, "/", destfiles[id][i]), handle = h)
         }
     }
-    return(invisible(destfiles))
+    return(invisible(paste0(outPath,"/",destfiles)))
 }
