@@ -25,7 +25,8 @@
 #' # Don't forget to provide in copernicus_options() your user and password
 #' # for COPERNICUS data portal before running this
 #' # Let's download NDVI V1 prodct, for JUN 2009, and tile (h=19,v=4)
-#' download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', tileH = 19, tileV = 4)
+#' download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31',
+#'                    tileH = 19, tileV = 4)
 #' # one could also use an extent object, instead of (tileH,tileV) pairs, eg:
 #' library(raster)
 #' e <- extent(c(-1,2,49,51))
@@ -35,7 +36,7 @@
 #'
 #' @export
 download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR", "VCI",
-    "VPI", "DMP", "BA"), begin, end, tileH, tileV, extent, outPath = copernicus_options("downloadPath"),
+    "VPI", "DMP", "BA"), begin, end, extent, tileH, tileV, outPath = copernicus_options("downloadPath"),
     user = copernicus_options("user"), password = copernicus_options("password"),...) {
 
     if (copernicus_options("user") == "" | copernicus_options("password") == "")

@@ -103,17 +103,19 @@ plot(s)
 # first, download data spanning neighbouring tiles
 e <- extent(c(-1,1,49,51)) # the English Channel
 # the groupByDate argument allows to return a list of files, grouped by date
-fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',extent = e,groupByDate = TRUE)
+fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',
+                         extent = e,groupByDate = TRUE)
 # now extract
 f <- extract_copernicus(fnames = fn,extent = e, layers = 2)
 f <- sub('\\\\.h5','_NDVI.tif',f)
 s <-stack(f);s
 plot(s,1)
-# Let's add the COPERNICUS tiling system, projected to Plate CarrÃ©e
+# Let's add the COPERNICUS tiling system, projected to Plate Carree
 sPol <- spTransform(gen_tile_copernicus(poly = T),CRS("+init=epsg:32662"))
 plot(sPol,add=T)
 # mosaicking works also with projection
-f <- extract_copernicus(fnames = fn,extent = e, outProj = '+init=epsg:32632', layers = 2, resamplingType = "bilinear")
+f <- extract_copernicus(fnames = fn,extent = e, outProj = '+init=epsg:32632', layers = 2,
+                       resamplingType = "bilinear")
 f <- sub('\\\\.h5','_NDVI.tif',f)
 s <-stack(f);s
 plot(s)

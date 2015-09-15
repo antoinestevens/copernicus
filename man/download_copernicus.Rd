@@ -15,12 +15,12 @@ download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password,.
 
 \item{end}{end of the time period. Same format as \code{begin}}
 
+\item{extent}{an object of class \code{Raster*}, \code{Extent} or \code{SpatialPolygons*} giving the extent from which tiles should be downloaded.
+See \code{\link{get_tile_copernicus}} for details.}
+
 \item{tileH}{H index of the tile COPERNICUS system (\code{numeric} or \code{character})}
 
 \item{tileV}{V index of the tile COPERNICUS system (\code{numeric} or \code{character})}
-
-\item{extent}{an object of class \code{Raster*}, \code{Extent} or \code{SpatialPolygons*} giving the extent from which tiles should be downloaded.
-See \code{\link{get_tile_copernicus}} for details.}
 
 \item{outPath}{Path where downloaded files should be stored. Default set via \code{copernicus_options('downloadPath')}}
 
@@ -45,7 +45,8 @@ One should choose to use either an extent or pairs of (H,V) values. If extent is
 # Don't forget to provide in copernicus_options() your user and password
 # for COPERNICUS data portal before running this
 # Let's download NDVI V1 prodct, for JUN 2009, and tile (h=19,v=4)
-download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', tileH = 19, tileV = 4)
+download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31',
+                   tileH = 19, tileV = 4)
 # one could also use an extent object, instead of (tileH,tileV) pairs, eg:
 library(raster)
 e <- extent(c(-1,2,49,51))
