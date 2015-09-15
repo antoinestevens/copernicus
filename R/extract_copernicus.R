@@ -41,7 +41,8 @@
 #' get_tile_copernicus(tileH = 19, tileV = 4)
 #' # create extent object
 #' library(raster)
-#' e <- extent(c(14,15,45,46)) # xmin,xmax,ymin,ymax
+#' # extent corresponding to the Delta of the Po
+#' e <- extent(c(10.5,12.5,44,46)) # xmin,xmax,ymin,ymax
 #' f <- extract_copernicus(fnames = fn,extent = e,job = 'H19V4',extend = 1, layers = 2)
 #' f # name of the h5 file(s)
 #' # for each layer, the function append its name to the saved file name
@@ -53,7 +54,6 @@
 #' # extent argument could also be a Raster* object,
 #' # its projection, and resolution are then used to crop/project
 #' # first let's create a raster object using the extent object
-#' e <- extent(c(14,15,45,46)) # xmin,xmax,ymin,ymax
 #' r <- raster(e)
 #' projection(r) <- '+init=epsg:4326' # LatLon WGS84
 #' # project to UTM 32N
@@ -80,13 +80,21 @@
 #' plot(s)
 #' # extract_copernicus allows also to mosaic files, by grouping file names within a list
 #' # first, download data spanning neighbouring tiles
-#' e <- extent(c(-1.5,2.5,49,51))
+#' e <- extent(c(-1,1,49,51))
 #' # the groupByDate argument allows to return a list of files, grouped by date
 #' fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',extent = e,groupByDate = TRUE)
 #' # now extract
-#' f <- extract_copernicus(fnames = fn,extent = extent, layers = 2)
+#' f <- extract_copernicus(fnames = fn,extent = e, layers = 2)
 #' f <- sub('\\.h5','_NDVI.tif',f)
-#' s <-stack(f)
+#' s <-stack(f);s
+#' plot(s,1)
+#' # Let's add the COPERNICUS tiling system, projected to Plate Carrée
+#' sPol <- spTransform(gen_tile_copernicus(poly = T),CRS("+init=epsg:32662"))
+#' plot(sPol,add=T)
+#' # mosaicking works also with projection
+#' f <- extract_copernicus(fnames = fn,extent = e, outProj = '+init=epsg:32632', layers = 2, resamplingType = "bilinear")
+#' f <- sub('\\.h5','_NDVI.tif',f)
+#' s <-stack(f);s
 #' plot(s)
 #' }
 #'
@@ -122,15 +130,18 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
         if (pixelSize[1] != "asIn")
             warning("resolution of extent Raster object will override pixelSize argument")
         resamplingType <- match.arg(resamplingType)
-    }
-
-    if (inherits(extent, "SpatialPolygons")) {
+    } else if (inherits(extent, "SpatialPolygons")) {
         # extent is a SpatialPolygons*, then reproject to the same coord system
         if (!is.na(projection(extent))) {
             t_srs <- projection(extent)
             warning("extent SpatialPolygons projection will override argument")
         }
         resamplingType <- match.arg(resamplingType)
+    } else if (class(extent)=="Extent"){
+          extent <- raster(extent)
+          projection(extent) <- "+init=epsg:4326"
+    } else if (!is.null(extent)){
+        stop("extent should be of class Raster*, SpatialPolygons* or Extent")
     }
 
     # append job folder to outPath
@@ -140,7 +151,6 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
     }
 
     cat("Output Directory = ", outPath, "\n")
-    restore.point("gfgfgfgf")
     # fnames could be a list with file names, grouped by years,
     # so we iterate over the list and for each element of the list, again
     f_h5 <- foreach(fgroup = iterators::iter(fnames), .combine = c)%do%{
@@ -191,7 +201,9 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
 
                     # project to geographical coordinates if necessary
                     if (!isLonLat(t_srs)&!is.null(t_srs))
-                        e <- extent(projectExtent(extent, "+init=epsg:4326")) else e <- extent(extent)
+                      e <- extent(projectExtent(extent, "+init=epsg:4326"))
+                    else
+                      e <- extent(extent)
 
                     # now, add row/col (or pix) at each side if requested by the user
                     if (!missing(extend)) {
@@ -222,14 +234,15 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
 
                 h5info <- h5info[layer, ]  # extract the selected layers only
 
-
                 att <- rhdf5::h5readAttributes(f_h5, h5info$name)
                 rhdf5::H5close()
-
-                cat(paste0("Extracting: ", basename(f_h5)))
-                cat("\n Layer: \n")
-                cat(paste0(h5info$name, "\n"))
-
+                if(length(fgroup)>1){
+                    cat(paste0("Extracting: ", basename(f_h5),"\n"))
+                } else {
+                  if(i==1)
+                    cat(paste0("Extracting: ", basename(f_h5),"\n"))
+                }
+                cat(paste0("- ", h5info$name, "\n"))
 
                 dst_dataset <- sub("\\.grd$", ".tif", rasterTmpFile())
                 # http://land.copernicus.eu/global/faq/how-convert-swi-hdf5-data-geotiff

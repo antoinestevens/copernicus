@@ -62,7 +62,8 @@ extract_copernicus(fnames = fn,job = 'H19V4',layers = c(1:3))
 get_tile_copernicus(tileH = 19, tileV = 4)
 # create extent object
 library(raster)
-e <- extent(c(14,15,45,46)) # xmin,xmax,ymin,ymax
+# extent corresponding to the Delta of the Po
+e <- extent(c(10.5,12.5,44,46)) # xmin,xmax,ymin,ymax
 f <- extract_copernicus(fnames = fn,extent = e,job = 'H19V4',extend = 1, layers = 2)
 f # name of the h5 file(s)
 # for each layer, the function append its name to the saved file name
@@ -74,7 +75,6 @@ plot(s)
 # extent argument could also be a Raster* object,
 # its projection, and resolution are then used to crop/project
 # first let's create a raster object using the extent object
-e <- extent(c(14,15,45,46)) # xmin,xmax,ymin,ymax
 r <- raster(e)
 projection(r) <- '+init=epsg:4326' # LatLon WGS84
 # project to UTM 32N
@@ -101,13 +101,21 @@ s <- stack(sub('\\\\.h5','_NDVI.tif',f));s
 plot(s)
 # extract_copernicus allows also to mosaic files, by grouping file names within a list
 # first, download data spanning neighbouring tiles
-e <- extent(c(-1.5,2.5,49,51))
+e <- extent(c(-1,1,49,51))
 # the groupByDate argument allows to return a list of files, grouped by date
 fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',extent = e,groupByDate = TRUE)
 # now extract
-f <- extract_copernicus(fnames = fn,extent = extent, layers = 2)
+f <- extract_copernicus(fnames = fn,extent = e, layers = 2)
 f <- sub('\\\\.h5','_NDVI.tif',f)
-s <-stack(f)
+s <-stack(f);s
+plot(s,1)
+# Let's add the COPERNICUS tiling system, projected to Plate CarrÃ©e
+sPol <- spTransform(gen_tile_copernicus(poly = T),CRS("+init=epsg:32662"))
+plot(sPol,add=T)
+# mosaicking works also with projection
+f <- extract_copernicus(fnames = fn,extent = e, outProj = '+init=epsg:32632', layers = 2, resamplingType = "bilinear")
+f <- sub('\\\\.h5','_NDVI.tif',f)
+s <-stack(f);s
 plot(s)
 }
 }
