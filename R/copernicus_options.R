@@ -1,8 +1,8 @@
 # https://cran.r-project.org/web/packages/settings/vignettes/settings.html Variable, global
 # to package's namespace.  This function is not exported to user space and does not need to
 # be documented.
-MYPKGOPTIONS <- settings::options_manager(downloadPath = paste0(getwd(), "/COP_DATA/zip"),
-    outPath = paste0(getwd(), "/COP_DATA/tif"), outProj = "+init=epsg:32662", pixelSize = "asIn",
+MYPKGOPTIONS <- settings::options_manager(downloadPath = "zip",
+    outPath = "tif", outProj = "+init=epsg:32662", pixelSize = "asIn",
     gdalPath = "C:/OSGeo4W64/bin/", server = "http://land.copernicus.vgt.vito.be/PDF///datapool/Vegetation/",
     user = "", password = "", resamplingType = "near")
 

@@ -147,6 +147,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
     }
 
     # append job folder to outPath
+    outPath <- normalizePath(outPath)
     if (job != "") {
         if (stringr::str_detect(outPath, "/$"))
             outPath <- paste0(outPath, job) else outPath <- paste0(outPath, "/", job)
