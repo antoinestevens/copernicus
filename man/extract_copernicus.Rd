@@ -101,7 +101,7 @@ s <- stack(sub('\\\\.h5','_NDVI.tif',f));s
 plot(s)
 # extract_copernicus allows also to mosaic files, by grouping file names within a list
 # first, download data spanning neighbouring tiles
-e <- extent(c(-1,1,49,51))
+e <- extent(c(-1,1,49,51)) # the English Channel
 # the groupByDate argument allows to return a list of files, grouped by date
 fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',extent = e,groupByDate = TRUE)
 # now extract

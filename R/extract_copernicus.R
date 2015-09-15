@@ -80,7 +80,7 @@
 #' plot(s)
 #' # extract_copernicus allows also to mosaic files, by grouping file names within a list
 #' # first, download data spanning neighbouring tiles
-#' e <- extent(c(-1,1,49,51))
+#' e <- extent(c(-1,1,49,51)) # the English Channel
 #' # the groupByDate argument allows to return a list of files, grouped by date
 #' fn <- download_copernicus(product, begin = '2009-01-01', end = '2009-01-31',extent = e,groupByDate = TRUE)
 #' # now extract
@@ -172,6 +172,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 } else {
                     f_h5 <- f
                 }
+
                 f_h5 <- paste0(outPath, "/", basename(f_h5))
 
                 h5info <- rhdf5::h5ls(f_h5, all = T)
@@ -213,21 +214,18 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
 
                         e <- extend(e, extend/112)  # add extend*(1/112) at each side (row/col)
                     }
+                    # create tile raster
+                    tile <- raster(e_tile,resolution = 1/112)
 
-                    # xy in pixels for the subwindow
-                    #  first, crop the extent to the extent of the tile
-                    e@xmin <- max(e@xmin,LONG)
-                    e@ymin <- max(e@ymin,LAT - 10)
-                    e@xmax <- min(e@xmax,LONG + 10)
-                    e@ymax <- min(e@ymax,LAT)
+                    # crop the extent to the extent of the tile
+                    e <- extent(crop(tile,e))
 
-                    srcwin <- c(e@xmin - LONG, LAT  - e@ymax, e@xmax - e@xmin, e@ymax - e@ymin) * 112  # crop
-
-                    # extend subwindow by a demi pixel for @xmin and @ymin, but reduce by a demi pixel (only
-                    # 112 pixels are kept here, not 113!) for @xmax, @ymax!
-                    e[1:4] <- e[1:4] - (1/112)/2
                     # project the subwindow
                     e_proj <- rgdal::project(as.matrix(e), "+init=epsg:32662 +over")
+
+                    # compute crop subwindow
+                    # translate extent to the coord system of the tile (upper-left --> pixel centre)
+                    srcwin <- round(c(e@xmin - LONG + (1/112/2), LAT  - e@ymax + (1/112/2), e@xmax - e@xmin, e@ymax - e@ymin) * 112)
                 } else {
                     e <- NULL
                 }
@@ -269,6 +267,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
               f_h5 <- paste0(outPath,"/g2_BIOPAR_",ftmp$product,"_",ftmp$date,"0000_",ftmp$sensor,"_V",ftmp$version,".h5")
             }
 
+            # Projection/ mosaicking
             if (!is.null(t_srs) & !is.null(tr)) {
               r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
                                        s_srs = "+init=epsg:32662", t_srs = t_srs, tr = tr, r = resamplingType, output_Raster = T,
