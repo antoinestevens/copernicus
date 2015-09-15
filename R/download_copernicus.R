@@ -40,8 +40,7 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
 
     if (copernicus_options("user") == "" | copernicus_options("password") == "")
         stop("Set a user and password via 'copernicus_options()' to access COPERNICUS data portal")
-
-    if(missing(extent)&(missing(tileH)|missing(tileV))){
+    if(missing(extent)){
       if (missing(tileH))
           stop("Please provide a tileH argument")
       if (missing(tileV))
@@ -85,24 +84,30 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     # create dir if necessary
     if (!dir.exists(outPath))
         dir.create(outPath, showWarnings = FALSE, recursive = TRUE)
+    if(is.list(urls))
+      destfiles <- lapply(urls, basename)
+    else
+      destfiles <- basename(urls)
 
-    destfiles <- lapply(urls, basename)
+    u <- unlist(urls)
+    d <- unlist(destfiles)
 
-    urls <- unlist(urls)
-    dest <- unlist(destfiles)
-
-    id <- !dest %in% list.files(outPath)  # download only those that are not in the output directory
+    id <- !d %in% list.files(outPath)  # download only those that are not in the output directory
 
     print(paste0(sum(id), " files will be downloaded!"))
 
-    urls <- urls[id]
+    u <- u[id]
 
-    if (length(urls)) {
-        foreach(i = 1:length(urls))%do%{
-            print(paste("Downloading:", dest[id][i]))
+    if (length(u)) {
+        foreach(i = 1:length(u))%do%{
+            print(paste("Downloading:", d[id][i]))
             # download data
-            curl::curl_download(url = urls[i], dest = paste0(outPath, "/", dest[id][i]), handle = h)
+            curl::curl_download(url = u[i], dest = paste0(outPath, "/", d[id][i]), handle = h)
         }
     }
-    return(invisible(lapply(destfiles,function(x)paste0(outPath,"/",x))))
+
+    if(is.list(urls))
+      return(invisible(lapply(destfiles,function(x)paste0(outPath,"/",x))))
+    else
+      return(invisible(paste0(outPath,"/",destfiles)))
 }
