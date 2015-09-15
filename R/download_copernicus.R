@@ -83,6 +83,7 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     curl::handle_setopt(h, username = user, password = password)
 
     # create dir if necessary
+    outPath <- normalizePath(outPath)
     if (!dir.exists(outPath))
         dir.create(outPath, showWarnings = FALSE, recursive = TRUE)
     if(is.list(urls))

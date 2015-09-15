@@ -151,6 +151,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
         if (stringr::str_detect(outPath, "/$"))
             outPath <- paste0(outPath, job) else outPath <- paste0(outPath, "/", job)
     }
+    outPath <- normalizePath(outPath)
 
     cat("Output Directory = ", outPath, "\n")
     # fnames could be a list with file names, grouped by years,
