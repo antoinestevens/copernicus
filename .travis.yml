@@ -5,7 +5,8 @@ warnings_are_errors: true
 sudo: required
 
 apt_packages:
-  - gdal-bin
+  - libgdal-dev
+  - libproj-dev
 
 bioc_packages:
   - rhdf5
