@@ -4,11 +4,8 @@ language: r
 warnings_are_errors: true
 sudo: required
 
-apt_packages:
-  - libhdf5-serial-dev
-  - libhdf5-dev
-  - libgdal-dev
-  - libproj-dev
+before_install:
+  - sudo apt-get install libv8-dev
 
 
 bioc_packages:
