@@ -10,7 +10,7 @@
 #'        Else, the projection info of the object is used to project the image to the same projection.
 #' @param extend numeric vector of length 1 or 2 (nrow,ncol). Extend the spatial extent of the subwindows (extent argument) by a given number of (rows,cols)
 #' @param convertDN logical value indicating whether DN values should be converted to physical values (eg vegetation index). Default to TRUE
-#' @param outProj \code{character} string giving the coordinate projection system of the output in the PROJ.4 format. Default is '+init=epsg:32662' (Plate Carr\'ee, WGS84), i.e. no re-projection is done.
+#' @param outProj \code{character} string giving the coordinate projection system of the output in the PROJ.4 format. Default is '+init=epsg:32662' (Plate Carree, WGS84), i.e. no re-projection is done.
 #'        See \code{copernicus_options('outProj')} to change default value.
 #'        if the \code{extent} argument is set, with an object of class \code{\link[raster]{Raster-class}} or \code{\link[sp]{SpatialPolygons-class}}, their projection info is used instead, unless their projection is 'NA'.
 #' @param pixelSize output pixel size (c(xres,yres)). Default is 'asIn' (same as the input image). Can be set via \code{copernicus_options('pixelSize')}. If a \code{\link[raster]{Raster-class}} object is provided as \code{extent} argument, the resolution of the object override this argument.
@@ -196,7 +196,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 # 1/2 pixel size in all directions. '
                 e_tile <- e_tile + (1/112)  # same as:  e_tile <- extend(e_tile,(1/112)/2)
 
-                # project geographical coordinates in the plate carrée system (no datum transformation)
+                # project geographical coordinates in the plate carree system (no datum transformation)
                 # the +over argument allows longitude output outside -180 to 180 range (disables wrapping)
                 # (because one can have potentially -180 - (1/112)/2 )
                 # https://trac.osgeo.org/proj/wiki/GenParm
