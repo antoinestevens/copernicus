@@ -1,3 +1,5 @@
+[![Travis-CI Build Status](https://travis-ci.org/antoinestevens/copernicus.svg?branch=master)](https://travis-ci.org/antoinestevens/copernicus)
+
 # Access and process COPERNICUS Global Land Vegetation products
 
 The aim of `copernicus` is to access to the [COPERNICUS Global Land Vegetation data portal](http://land.copernicus.eu/global/). 
