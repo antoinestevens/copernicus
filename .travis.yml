@@ -5,7 +5,9 @@ warnings_are_errors: true
 sudo: required
 
 before_install:
-  - sudo apt-get install libv8-dev
+  - libgdal1h
+  - gdal-bin
+  - libgdal-dev
 
 
 bioc_packages:
