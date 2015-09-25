@@ -1,6 +1,4 @@
 language: r
 sudo: required
 warnings_are_errors: true
-install:
-  - Rscript -e "install.packages('MODIS', repos='http://R-Forge.R-project.org')"
 bioc_packages: rhdf5
