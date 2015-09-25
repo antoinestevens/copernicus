@@ -4,3 +4,4 @@ rstudio.pub
 COP_DATA
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.travis\.yml$
