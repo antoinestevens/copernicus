@@ -41,6 +41,9 @@
 #' @export
 convert_qf_copernicus <- function(r, qf) {
 
+    if (!inherits(extent, "Raster"))
+      stop("r should be a Raster* object")
+
     q <- stringr::str_detect(paste(qf, collapse = "|"), c("sea", "snow", "suspect", "aero_status_mixed",
         "aero_source_climato", "input_invalid", "lai_invalid", "fapar_invalid", "fcover_invalid",
         "b2_saturation", "b3_saturation", "filtered", "gap_filled", "ndvi_invalid"))
