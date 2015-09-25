@@ -1,6 +1,6 @@
 Package: copernicus
 Type: Package
-Title: Download and extract COPERNICUS Global Land Vegetation products
+Title: Download and Extract COPERNICUS Global Land Vegetation Products
 Version: 0.1.0
 Author: Antoine Stevens
 Maintainer: Antoine Stevens <antoinexstevens@gmail.com>
