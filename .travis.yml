@@ -4,9 +4,6 @@ language: r
 warnings_are_errors: true
 sudo: required
 
-r_packages:
-  - devtools
-
 r_binary_packages:
   - rgdal
 
@@ -14,7 +11,7 @@ bioc_packages:
   - rhdf5
 
 install:
-  - Rscript -e 'options(repos = c(CRAN = "http://cran.rstudio.com")); install.packages(c("raster","Rcpp","sp")); install.packages("MODIS", repos= "http://r-forge.r-project.org")'
+  - Rscript -e 'options(repos = c(CRAN = "http://cran.rstudio.com")); install.packages(c("devtools","raster","Rcpp","sp")); install.packages("MODIS", repos= "http://r-forge.r-project.org")'
 
 env:
  global:
