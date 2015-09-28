@@ -57,19 +57,20 @@ convert_qf_copernicus <- function(r, qf, filename=rasterTmpFile(),...) {
     b[[1]] <- brick(r,nl=nlayers(r), values=FALSE)
     b[[1]] <- writeStart(b[[1]], filename = filename,...)
     
-    tr <- blockSize(x)
+    tr <- blockSize(r)
     
     for ( i in seq_along(tr$row))
-      b[[1]] <- writeValues(b[[1]], .convert_qf(i = i, row = tr$row, nrows = tr$nrow,qf = q), tr$row[i])
+      b[[1]] <- writeValues(b[[1]], .convert_qf_cop(i = i, row = tr$row, nrows = tr$nrow,qf = q), tr$row[i])
     
     for (a in seq_along(b))
       b[[a]] <- writeStop(b[[a]])
     
     b <- brick(filename)
+    names(b) <- names(r)
     b
 }
 
-.convert_qf <- function(i,row,nrows,qf){
+.convert_qf_cop <- function(i,row,nrows,qf){
   
   # Bit 1: Land/Sea Land Sea Bit 2: Snow status Clear Snow Bit 3: Suspect No suspect Suspect
   # Bit 4: Aerosol status Pure Mixed Bit 5: Aerosol source Modis Climato Bit 6: Input status
