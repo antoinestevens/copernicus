@@ -48,4 +48,6 @@ Quality Flags can be extracted with `convert_qf_copernicus`.
 
 Some of the package default options are set with `copernicus_options`, such as the download path, user name and password.
 
-TODO: wrapper around `download_copernicus` and `extract_copernicus`
+TODO:
+ - wrapper around `download_copernicus` and `extract_copernicus`
+ - allow different output format
