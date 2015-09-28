@@ -10,7 +10,8 @@
 #'        Else, the projection info of the object is used to project the image to the same projection.
 #' @param extend numeric vector of length 1 or 2 (nrow,ncol). Extend the spatial extent of the subwindows (extent argument) by a given number of (rows,cols)
 #' @param convertDN logical value indicating whether DN values should be converted to physical values (eg vegetation index). Default to TRUE
-#' @param outProj \code{character} string giving the coordinate projection system of the output in the PROJ.4 format. Default is '+init=epsg:32662' (Plate Carree, WGS84), i.e. no re-projection is done.
+#' @param outProj \code{character} string giving the coordinate projection system of the output in the PROJ.4 format. Can also be a \code{\link[sp]{CRS-class}} object.
+#'        Default is '+init=epsg:32662' (Plate Carree, WGS84), i.e. no re-projection is done.
 #'        See \code{copernicus_options('outProj')} to change default value.
 #'        if the \code{extent} argument is set, with an object of class \code{\link[raster]{Raster-class}} or \code{\link[sp]{SpatialPolygons-class}}, their projection info is used instead, unless their projection is 'NA'.
 #' @param pixelSize output pixel size (c(xres,yres)). Default is 'asIn' (same as the input image). Can be set via \code{copernicus_options('pixelSize')}. If a \code{\link[raster]{Raster-class}} object is provided as \code{extent} argument, the resolution of the object override this argument.
@@ -111,6 +112,9 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
     if (missing(extent))
         extent <- NULL
 
+    if(class(outProj)=="CRS")
+      outProj <- CRSargs(outProj)
+
     if (!identical(CRS(outProj), CRS(copernicus_options("outProj"))))
         t_srs <- outProj else t_srs <- NULL
 
@@ -201,14 +205,18 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 # (because one can have potentially -180 - (1/112)/2 )
                 # https://trac.osgeo.org/proj/wiki/GenParm
                 e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over")
+                restorepoint::restore.point("fdff")
                 if (!is.null(extent)) {
 
                     # project to geographical coordinates if necessary
-                    if (!isLonLat(t_srs)&!is.null(t_srs))
-                      e <- extent(projectExtent(extent, "+init=epsg:4326"))
-                    else
+                    if (!is.null(t_srs)){
+                      if(!isLonLat(CRS(t_srs)))
+                        e <- extent(projectExtent(extent, "+init=epsg:4326"))
+                      else
                       e <- extent(extent)
-
+                    } else {
+                      e <- extent(extent)
+                    }
                     # now, add row/col (or pix) at each side if requested by the user
                     if (!missing(extend)) {
 
