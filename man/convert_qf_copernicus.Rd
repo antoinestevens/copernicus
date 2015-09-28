@@ -4,13 +4,18 @@
 \alias{convert_qf_copernicus}
 \title{Convert bit values from a QFLAG COPERNICUS product}
 \usage{
-convert_qf_copernicus(r,qf)
+convert_qf_copernicus(r,qf,filename=rasterTmpFile(),...)
 }
 \arguments{
 \item{r}{A \code{\link[raster]{Raster-class}} object}
 
 \item{qf}{Quality Flag to be extracted. Can be more than one of these:
 'sea','snow','suspect','aero_status_mixed','aero_source_climato','input_invalid','lai_invalid','fapar_invalid','fcover_invalid','b2_saturation','b3_saturation','filtered','gap_filled','ndvi_invalid'}
+
+\item{filename}{Character vector giving the name of the output raster to save.
+Default is created through \code{\link[raster]{rasterTmpFile}}}
+
+\item{...}{arguments passed to \code{\link[raster]{writeRaster}}}
 }
 \value{
 A \code{\link[raster]{Raster-class}} object with two values (1,0), representing respectively pixels that are flagged by at least one of the give \code{qf},
