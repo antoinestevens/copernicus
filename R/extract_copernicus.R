@@ -113,7 +113,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
         extent <- NULL
 
     if(class(outProj)=="CRS")
-      outProj <- CRSargs(outProj)
+      outProj <- rgdal::CRSargs(outProj)
 
     if (!identical(CRS(outProj), CRS(copernicus_options("outProj"))))
         t_srs <- outProj else t_srs <- NULL
@@ -205,7 +205,6 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 # (because one can have potentially -180 - (1/112)/2 )
                 # https://trac.osgeo.org/proj/wiki/GenParm
                 e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over")
-                restorepoint::restore.point("fdff")
                 if (!is.null(extent)) {
 
                     # project to geographical coordinates if necessary
