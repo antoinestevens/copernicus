@@ -4,8 +4,9 @@ language: r
 warnings_are_errors: true
 sudo: required
 
-r_github_packages:
- - rforge/modis
+install:
+  - Rscript -e 'options(repos = c(CRAN = "http://cran.rstudio.com")); devtools::install_github(c("rforge/modis"), build_vignettes = FALSE, subdir = "pkg/MODIS")'
+
 
 r_binary_packages:
   - rgdal
