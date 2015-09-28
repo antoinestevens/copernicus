@@ -22,7 +22,7 @@ a \code{data.frame} or \code{SpatialPolygonsDataFrame} with h,v pairs and boundi
 Generates the COPERNICUS tiling system
 }
 \details{
-See also \code{\link[MODIS]{genTile}} in the MODIS package
+See also \code{genTile} in the MODIS package
 }
 \examples{
 # Return a data.frame with tiling info

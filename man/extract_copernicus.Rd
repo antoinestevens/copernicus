@@ -19,7 +19,7 @@ Else, the projection info of the object is used to project the image to the same
 
 \item{convertDN}{logical value indicating whether DN values should be converted to physical values (eg vegetation index). Default to TRUE}
 
-\item{outProj}{\code{character} string giving the coordinate projection system of the output in the PROJ.4 format. Default is '+init=epsg:32662' (Plate Carr\'ee, WGS84), i.e. no re-projection is done.
+\item{outProj}{\code{character} string giving the coordinate projection system of the output in the PROJ.4 format. Default is '+init=epsg:32662' (Plate Carree, WGS84), i.e. no re-projection is done.
 See \code{copernicus_options('outProj')} to change default value.
 if the \code{extent} argument is set, with an object of class \code{\link[raster]{Raster-class}} or \code{\link[sp]{SpatialPolygons-class}}, their projection info is used instead, unless their projection is 'NA'.}
 
