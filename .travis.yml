@@ -5,7 +5,7 @@ warnings_are_errors: true
 sudo: required
 
 install:
-  - Rscript -e 'options(repos = c(CRAN = "http://cran.rstudio.com")); devtools::install_github(c("rforge/modis"), build_vignettes = FALSE, subdir = "pkg/MODIS")'
+  - Rscript -e 'options(repos = c(CRAN = "http://cran.rstudio.com")); install.packages("devtools") ; devtools::install_github(c("rforge/modis"), build_vignettes = FALSE, subdir = "pkg/MODIS")'
 
 
 r_binary_packages:
