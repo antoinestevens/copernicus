@@ -4,8 +4,8 @@ language: r
 warnings_are_errors: true
 sudo: required
 
-install:
- - Rscript -e 'install.packages("MODIS", repos= "http://r-forge.r-project.org")'
+r_github_packages:
+ - rforge/modis
 
 r_binary_packages:
   - rgdal

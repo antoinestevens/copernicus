@@ -34,3 +34,5 @@ Imports:
     sp,
     settings,
     stringr
+Suggests:
+    MODIS
