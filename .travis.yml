@@ -10,9 +10,6 @@ r_binary_packages:
 bioc_packages:
   - rhdf5
 
-install:
-  - Rscript -e 'options(repos = c(CRAN = "http://cran.rstudio.com")); install.packages(c("devtools","raster","Rcpp","sp")); install.packages("MODIS", repos= "http://r-forge.r-project.org")'
-
 env:
  global:
    - CRAN: http://cran.rstudio.com
