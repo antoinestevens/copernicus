@@ -206,6 +206,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 # (because one can have potentially -180 - (1/112)/2 )
                 # https://trac.osgeo.org/proj/wiki/GenParm
                 e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over")
+                
                 if (!is.null(extent)) {
 
                     # project to geographical coordinates if necessary
@@ -238,10 +239,14 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                     # translate extent to the coord system of the tile (upper-left --> pixel centre)
                     srcwin <- round(c(e@xmin - LONG + (1/112/2), LAT  - e@ymax + (1/112/2), e@xmax - e@xmin, e@ymax - e@ymin) * 112)
                 } else {
-                    e <- NULL
+                    e_proj <- e_tile_proj
+                    srcwin <- NULL
                 }
                 
-                h5info <- h5info[layer, ]  # extract the selected layers only
+                if(nrow(h5info) == 1)
+                  layer <- NULL # remove sd_index when there is only one layer, else gdal_translate gives an error
+                else
+                  h5info <- h5info[layer, ]  # extract the selected layers only
 
                 att <- rhdf5::h5readAttributes(f_h5, h5info$name)
                 rhdf5::H5close()
@@ -255,14 +260,15 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
 
                 dst_dataset <- sub("\\.grd$", ".tif", rasterTmpFile())
                 # http://land.copernicus.eu/global/faq/how-convert-swi-hdf5-data-geotiff
-                if (is.null(e))
-                   gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = layer,
-                      a_ullr = e_tile_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
-                      a_nodate = as.numeric(att$MISSING_VALUE))
-                else
-                   gdalUtils::gdal_translate(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = layer,
-                    srcwin = srcwin, a_ullr = e_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
-                    a_nodate = as.numeric(att$MISSING_VALUE))
+                
+                args_to_gdal <- list(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = layer,
+                                     srcwin = srcwin, a_ullr = e_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
+                                     a_nodate = as.numeric(att$MISSING_VALUE))
+                
+                args_to_gdal <- args_to_gdal[!sapply(args_to_gdal,is.null)] # remove unnecessary arguments
+                
+                # convert
+                do.call(gdalUtils::gdal_translate,args_to_gdal)
 
                 # cleaning
                 if (zip&i==length(layers))
@@ -279,19 +285,14 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
             }
 
             # Projection/ mosaicking
-            if (!is.null(t_srs) & !is.null(tr)) {
-              r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
-                                       s_srs = "+init=epsg:32662", t_srs = t_srs, tr = tr, r = resamplingType, output_Raster = T,
-                                       overwrite = TRUE)
-
-            } else if (!is.null(t_srs) & is.null(tr)) {
-              r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
-                                       s_srs = "+init=epsg:32662", t_srs = t_srs, r = resamplingType, output_Raster = T,
-                                       overwrite = TRUE)
-            } else if (is.null(t_srs) & !is.null(tr)) {
-              r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
-                                       s_srs = "+init=epsg:32662", tr = tr, r = resamplingType, output_Raster = T,
-                                       overwrite = TRUE)
+            if (!is.null(t_srs) | !is.null(tr)) {
+              # projection
+              args_to_gdal <- list(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
+                                   s_srs = "+init=epsg:32662", t_srs = t_srs, tr = tr, r = resamplingType, output_Raster = T,
+                                   overwrite = TRUE)
+              args_to_gdal <- args_to_gdal[!sapply(args_to_gdal,is.null)] # remove unnecessary arguments
+              
+              r <- do.call(gdalUtils::gdalwarp,args_to_gdal)
             } else if (length(src_dataset)>1) {
               # mosaiking
               r <- gdalUtils::gdalwarp(srcfile = src_dataset, dstfile = sub("\\.grd$", ".tif", rasterTmpFile()),
