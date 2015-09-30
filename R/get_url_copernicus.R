@@ -19,7 +19,7 @@
 #' @examples
 #' # URL's for LAI product, for JAN 2014 and tiles (h=19,v=3) and (h=20,v=4)
 #' get_url_copernicus(product = 'LAI',begin = '20140101', end = '20140131',tileH = 19:20, tileV = 3:4)
-#'
+#' get_url_copernicus(product = 'NDVI_V2',begin = '20130101', end = '20130131',tileH = 19:20, tileV = 3:4)
 #' @export
 get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR",
     "VCI", "VPI", "DMP", "BA"), begin, end, tileH, tileV, groupByDate = FALSE, server = copernicus_options("server"),
@@ -76,12 +76,17 @@ get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER"
             version <- ifelse(ym < as.Date(lubridate::ymd("20140401")), v[1], v[2])
             ym <- ym + 9  # there is a 9 days lag for BA products
         } else {
-            sensor <- ifelse(ym < as.Date(lubridate::ymd("20140601")), "VGT", "PROBAV")  # change in the sensor since June 2014
+            sensor <- ifelse(ym < as.Date(lubridate::ymd("20140101")), "VGT", "PROBAV")  # change in the sensor since Jan 2014
             if (check_version) {
                 version <- check_version_copernicus(product)[1]
+                version <- rep(version,length(ym))
             } else {
-                if (product == "NDVI_V2")
-                  version <- "2.1" else version <- "1.0"
+                if (product == "NDVI_V2"){
+                  version <- ifelse(ym < as.Date(lubridate::ymd("20140101")), "2.0", "2.1")
+                } else{
+                  version <- "1.0"
+                  version <- rep(version,length(ym))
+                }
             }
         }
         a <- format(ym, "%Y%m%d0000")  # acquisition date
