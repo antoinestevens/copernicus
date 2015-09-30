@@ -165,7 +165,6 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
       # the layer loop is outside, to allow mosaiking
       # this is however not efficient, since the h5 is read several times
       foreach(layer = iterators::iter(layers),i = iterators::icount())%do%{
-
             src_dataset <- foreach(f = iterators::iter(fgroup),.combine = c)%do%{
 
                 finfo <- scan_file_copernicus(f)
@@ -183,8 +182,10 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 f_h5 <- paste0(outPath, "/", basename(f_h5))
 
                 h5info <- rhdf5::h5ls(f_h5, all = T)
-
-                ginfo <- gdalUtils::gdalinfo(f_h5)
+                if(layer>nrow(h5info))
+                  stop(paste0("Layer: ", layer, " does not exist in the h5 file"))
+                
+                info <- gdalUtils::gdalinfo(f_h5)
                 LAT <- stringr::str_subset(ginfo, "LAT") %>% stringr::str_replace(".+=", "") %>% as.numeric
                 LONG <- stringr::str_subset(ginfo, "LONG") %>% stringr::str_replace(".+=", "") %>% as.numeric
                 instrument <- stringr::str_subset(ginfo, "INSTRUMENT_ID") %>% stringr::str_replace(".+=", "")
@@ -239,7 +240,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 } else {
                     e <- NULL
                 }
-
+                
                 h5info <- h5info[layer, ]  # extract the selected layers only
 
                 att <- rhdf5::h5readAttributes(f_h5, h5info$name)
