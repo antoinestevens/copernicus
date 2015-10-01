@@ -10,7 +10,8 @@ scan_file_copernicus(fnames)
 \item{fnames}{\code{character} vector of file name(s)}
 }
 \value{
-a \code{data.frame} with variables 'input' (input name(s)), 'product', 'date', 'tile', 'sensor' (VGT or PROBAV), 'version' (version of the algorithm)
+a \code{data.frame} with variables 'input' (input name(s)), 'product', 'date', 'Date' (date converted to \code{\link{Date}} class),
+ 'tile', 'sensor' (VGT or PROBAV), 'version' (version of the algorithm)
 }
 \description{
 Extract COPERNICUS product characteristics from file names

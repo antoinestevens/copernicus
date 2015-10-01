@@ -4,7 +4,8 @@
 #' scan_file_copernicus(fnames)
 #' @param fnames \code{character} vector of file name(s)
 #' @return
-#' a \code{data.frame} with variables 'input' (input name(s)), 'product', 'date', 'tile', 'sensor' (VGT or PROBAV), 'version' (version of the algorithm)
+#' a \code{data.frame} with variables 'input' (input name(s)), 'product', 'date', 'Date' (date converted to \code{\link{Date}} class),
+#'  'tile', 'sensor' (VGT or PROBAV), 'version' (version of the algorithm)
 #' @details
 #' The geoland2-BioPar product follows the following naming  standard:
 # g2_BIOPAR_<Acronym>_<YYYYMMDDHHMM>_<AREA>_<SENSOR>_V<Major.Minor>
@@ -20,6 +21,8 @@
 scan_file_copernicus <- function(fnames) {
     fnames <- basename(fnames)
     s <- stringr::str_match(basename(fnames), "g2_BIOPAR_([[:alnum:]]+)_([[:digit:]]{8})[[:digit:]]{4}_([[:alnum:]]+)_([[:alnum:]]+)_V(.\\..)")
+    s <- as.data.frame(s,stringsAsFactors = FALSE,drop=FALSE)
     colnames(s) <- c("input", "product", "date", "tile", "sensor", "version")
-    return(as.data.frame(s))
+    s$Date <- as.Date(lubridate::ymd(s$date))
+    return(s[,c(1,2,3,7,4,5,6)])
 }
