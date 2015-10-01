@@ -3,6 +3,8 @@
 export(check_tile_copernicus)
 export(check_time_copernicus)
 export(check_version_copernicus)
+export(compare_raster_space)
+export(compare_raster_time)
 export(convert_qf_copernicus)
 export(copernicus_options)
 export(download_copernicus)
