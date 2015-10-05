@@ -4,7 +4,7 @@
 
 The aim of `copernicus` is to access to the [COPERNICUS Global Land Vegetation data portal](http://land.copernicus.eu/global/). 
 The package provides functions to easily download, extract, convert, subset and project COPERNICUS data.
-__The user should be registered to access data !__ The package is at its early development stage. Use with care!  
+__The user should be registered to access data__. The package is at its early development stage. Use with care!  
 Please report bugs to <antoinexstevens@gmail.com>
 
 ## To install copernicus, use:
@@ -33,7 +33,7 @@ Only the following products are available:  `NDVI_V1` (Normalized Difference Veg
 `DMP` (Dry Matter Productivity),`BA` (Burnt Areas).
 The availability of the data between two dates can be checked with `check_time_copernicus` and at a given location with `check_tile_copernicus`.
 One can get the URL's of images for a given time period, location and product name with `get_url_copernicus`.
-Information included in the name of the files (e.g. aglorithm version, instrument) can be retrieved with `scan_file_copernicus`.
+Information included in the name of the files (e.g. aglorithm version, instrument, acquisition date) can be retrieved with `scan_file_copernicus`.
 The COPERNICUS tiling system can be created with `gen_tile_copernicus` and fetched with `get_tile_copernicus`
 which will retrieve tiles info (h,v,bounding box in LatLon) based on an extent or (h,v) pair.
 
@@ -43,6 +43,10 @@ File conversion can be done with `extract_copernicus`, which will transfrom raw 
 using the associated gain and offset of each product. The function can further subset data on a given extent, resample to a given resolution
 and project to a given coordinate system. One can also choose which layers of the h5 files can be extracted.
 Quality Flags can be extracted with `convert_qf_copernicus`.
+
+## Compare raster time series
+
+`compare_raster_time` and `compare_raster_space` allow to compare two rasterBrick or rasterStack time series in terms of their spatial and temporal consistency, following the methods explained in Meroni et al. (2012). 
 
 ## Package options
 
