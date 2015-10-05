@@ -149,7 +149,7 @@ compare_raster_time <- function(x,y,
 
     # send expr and data to cluster nodes
     parallel::clusterEvalQ(cl,library(matrixStats))
-    parallel::clusterExport(cl,c(".compare_by_rows",".compare_xy"))
+    parallel::clusterExport(cl,".compare_xy")
 
     # number of blocks
     tr <- blockSize(x, minblocks=cores)
