@@ -68,7 +68,7 @@
 #'
 #' # Compare temporal consistency
 #' # Use the 'cores' to speed up processing!
-#' ct <- compare_raster_time(SPOT,PROBA,cores = 8)
+#' ct <- compare_raster_time(SPOT,PROBA)
 #' # plot
 #' brks <- c(0,.05,.1,.2,.3,.7)
 #' nb <- length(brks)-1
@@ -133,7 +133,6 @@ compare_raster_time <- function(x,y,
     nl <- length(stats)
     fn <- stats
   }
-
   b <- list()
   b[[1]] <- brick(x,nl=nl, values=FALSE)
   b[[1]] <- writeStart(b[[1]], filename = filename,...)
@@ -181,48 +180,20 @@ compare_raster_time <- function(x,y,
 .compare_time <- function(i,x,y,row,nrows, stats, f){
   x <- getValues(x,row=row[i], nrows=nrows[i])
   y <- getValues(y,row=row[i], nrows=nrows[i])
-
   if(is.null(f)){
-    .compare_by_rows(x,y,stats)
+    .compare_xy(x,y,stats)
   } else {
     res <- matrix(NA,nrow = nrow(x),ncol = nlevels(factor(f)))
     for(k in 1:nlevels(factor(f))){
       id <-  factor(f) == factor(f)[k]
       xk <- x[,id]
       yk <- y[,id]
-      res[,k] <- .compare_by_rows(xk,yk,stats)
+      res[,k] <- .compare_xy(xk,yk,stats)
     }
     res
   }
 }
 
-.compare_by_rows <- function(x,y,stats){
-
-  if("missing_x" %in% stats)
-    mix <- matrixStats::rowCounts(x,value = NA) # much faster
-  else
-    mix <- NULL
-  if("missing_y" %in% stats)
-    miy <- matrixStats::rowCounts(y,value = NA)
-  else
-    miy <- NULL
-
-  mis <- cbind("missing_x" = mix, "missing_y" = miy)
-
-  stats <- stats[!stats %in% c("missing_x","missing_y")]
-
-  if(length(stats)){
-    res <- matrix(NA,nrow = nrow(x),ncol = length(stats))
-    colnames(res) <- stats
-    for(j in 1:nrow(x)){
-      res[j,] <- .compare_xy(x[j,],y[j,],stats)
-    }
-    res <- cbind(mis, res)
-  } else {
-    res <- mis
-  }
-  res
-}
 
 #' @title Compare Spatial Consistency of Two Rasters
 #' @description Analysis of the spatial consistency (agreement) of two \code{\link[raster]{Raster-class}} objects with dimensions
@@ -306,9 +277,7 @@ compare_raster_time <- function(x,y,
 #'
 #' @export
 compare_raster_space <- function(x,y,lc,
-                                 stats= c("missing_x","missing_y", "cor", "ax", "ay", "bx", "by", "ac", "acu", "acs", "mbe" ,"rmsd", "rmspd", "rmpdu", "rmpds","mpdpu","mpdps"),
-                                 filename = rasterTmpFile(),...){
-
+                                 stats= c("missing_x","missing_y", "cor", "ax", "ay", "bx", "by", "ac", "acu", "acs", "mbe" ,"rmsd", "rmspd", "rmpdu", "rmpds","mpdpu","mpdps")){
   stats <- match.arg(stats,several.ok = TRUE)
 
   if(!inherits(x,"Raster"))
@@ -345,83 +314,73 @@ compare_raster_space <- function(x,y,lc,
   for (i in 1:tr$n){
 
     ch <- which(chunks == i)
-    x <- getValuesBlock(x,row = 1, nrows = nrow(x),col = 1, ncols = ncol(x),lyrs = ch)
-    y <- getValuesBlock(y,row = 1, nrows = nrow(y),col = 1, ncols = ncol(y),lyrs = ch)
+    xx <- getValuesBlock(x,row = 1, nrows = nrow(x),col = 1, ncols = ncol(x),lyrs = ch)
+    yy <- getValuesBlock(y,row = 1, nrows = nrow(y),col = 1, ncols = ncol(y),lyrs = ch)
 
     if(is.null(z)){
-      res[ch,] <- .compare_by_cols(x,y,stats)
+      res[ch,] <- .compare_xy(xx,yy,stats,byrow = FALSE)
     } else {
       for(k in 1:nlevels(z)){
         id <-  z == levels(z)[k]
-        res[ch,,k] <- .compare_by_cols(x[id,],y[id,],stats)
+        res[ch,,k] <- .compare_xy(xx[id,],yy[id,],stats,byrow = FALSE)
       }
     }
   }
   res
 }
 
-.compare_by_cols <- function(x,y,stats){
-
-  if("missing_x" %in% stats)
-    mix <- matrixStats::colCounts(x,value = NA) # much faster
-  else
-    mix <- NULL
-  if("missing_y" %in% stats)
-    miy <- matrixStats::colCounts(y,value = NA)
-  else
-    miy <- NULL
-
-  mis <- cbind("missing_x" = mix, "missing_y" = miy)
-
-  stats <- stats[!stats %in% c("missing_x","missing_y")]
-
-  if(length(stats)){
-    res <- matrix(NA,nrow = ncol(x),ncol = length(stats))
-    colnames(res) <- stats
-    for(j in 1:ncol(x)){
-      res[j,] <- .compare_xy(x[,j],y[,j],stats)
-    }
-    res <- cbind(mis, res)
-  } else {
-    res <- mis
-  }
-  res
-}
-
-.compare_xy <- function(x,y,stats){
-  # keep only complete cases
+.compare_xy <- function(x,y,stats,byrow = TRUE){
   # See Ji and Gallo (2006) An Agreement Coefficient for Image Comparison
   # pg 826 ex:
   # x = c(6, 8, 9, 10, 11, 14); y = c(2, 3, 5, 5, 6, 8)
-  ok <- complete.cases(x,y)
-  x <- x[ok]
-  y <- y[ok]
+  if(!byrow){
+    x <- t(x)
+    y <- t(y)
+  }
 
-  nx <- length(x)
+  py <- ncol(y);ny <- nrow(y) # dims
+  res <- matrix(nrow = ny, ncol = length(stats))
+  colnames(res) <- stats
 
-  sdx <- sd(x) # sd x
-  sdy <- sd(y) # sd y
+  if("missing_x" %in% stats){
+    mix <- matrixStats::rowCounts(x,value = NA) # much faster
+    res[,"missing_x"] <- mix
+  }
+  if("missing_y" %in% stats){
+    miy <- matrixStats::rowCounts(y,value = NA)
+    res[,"missing_y"] <- miy
+  }
 
-  mx <- mean(x)
-  my <- mean(y)
+  # keep only complete cases
+  x[is.na(y)] <- NA
+  y[is.na(x)] <- NA
 
-  res <- NULL
+  n <- py - matrixStats::rowCounts(y,value = NA) # n complete cases
+
+  mx <- .rowMeans(x,ny,py,na.rm = TRUE) # mean x
+  my <- .rowMeans(y,ny,py,na.rm = TRUE) # mean x
+
+  xmx <- x - mx # deviation to the mean x
+  ymy <- y - my # deviation to the mean y
+
+  sdx <- (.rowSums(xmx^2,ny,py,na.rm=T)/(n-1))^.5 # standard deviation x
+  sdy <- (.rowSums(ymy^2,ny,py,na.rm=T)/(n-1))^.5 # standard deviation y
 
   if(any(stats %in% c("cor","ax","bx","by","ay","acu","acs","rmpds","rmpdu","mpdpu","mpdps"))){
 
-    covxy <- cov(x,y) # covariance
-    r <- covxy/(sdx*sdy) # correlation coeff
+    covxy <- .rowSums(xmx*ymy,ny,py,na.rm=T)/(n-1) # covariance
+    r <- covxy/(sdx*sdy) # correlation
     if("cor" %in% stats)
-      res <- c(res,"cor" = r)
+      res[,"cor"] <- r
 
     if(any(stats %in% c("ax","bx","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
       bx <- sdx/sdy * sign(r)  # coefficient of the GMFR x = a + by
       ax <- mx - (bx*my)  # intercept of the GMFR x = a + by
       xhat <- ax + (bx*y)
       if("ax" %in% stats)
-        res <- c(res,"ax" = ax)
+        res[,"ax"] <- ax
       if("bx" %in% stats)
-        res <- c(res,"bx" = bx)
+        res[,"bx"] <- bx
     }
 
     if(any(stats %in% c("ay","by","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
@@ -429,40 +388,40 @@ compare_raster_space <- function(x,y,lc,
       ay <- my - (by*mx) # intercept of the GMFR y = a + bx
       yhat <- ay + (by*x)
       if("ay" %in% stats)
-        res <- c(res,"ay" = ay)
+        res[,"ay"] <- ay
       if("by" %in% stats)
-        res <- c(res,"by" = by)
+        res[,"by"] <- by
     }
   }
 
   if(any(stats %in% c("mbe","ac","acs","acu"))){
     mbe <- (mx-my) # mbe
     if("mbe" %in% stats)
-      res <- c(res,"mbe" = mbe)
+      res[,"mbe"] <- mbe
   }
 
   if(any(stats %in% c("rmsd","rmspd","ac","acs","acu","mbe","rmpds","mpdpu","mpdps"))){
 
-    ssd <- sum((x-y)^2) # sum of squared differences
+    ssd <- .rowSums((x-y)^2,ny,py,na.rm=T) # sum of squared differences
 
     if(any(stats %in% c("ac","acs","acu"))){
       mbe <- abs(mbe)
-      spod <- sum((mbe + abs(x - mx))*(mbe + abs(y - my))) # sum of potential differences
+      spod <- .rowSums((mbe + abs(x - mx))*(mbe + abs(y - my)),ny,py,na.rm=T) # sum of potential differences
       if("ac" %in% stats){
         ac <- 1 - (ssd/spod) # agreement coefficient
-        res <- c(res,"ac" = ac)
+        res[,"ac"] <- ac
       }
     }
 
     if(any(stats %in% c("rmsd","rmspd","mpdpu","mpdps"))){
-      msd <- ssd / nx # mean squared difference
+      msd <- ssd / n # mean squared difference
       if(any(stats %in% c("rmsd","rmspd"))){
         rmsd <- msd^.5
         if("rmsd" %in% stats)
-          res <- c(res,"rmsd" = rmsd)
+          res[,"rmsd"] <- rmsd
         if("rmspd" %in% stats){
           rmspd <- rmsd/my
-          res <- c(res,"rmspd" = rmspd)
+          res[,"rmspd"] <- rmspd
         }
       }
     }
@@ -470,44 +429,46 @@ compare_raster_space <- function(x,y,lc,
 
   if(any(stats %in% c("acu","acs","rmpdu","rmpds","mpdps","mpdpu"))){
 
-    spdu <- sum(abs(x - xhat)*abs(y - yhat)) # unsystematic sum of product-difference
+    spdu <- .rowSums(abs(x - xhat)*abs(y - yhat),ny,py,na.rm=T) # unsystematic sum of product-difference
 
     if(any(stats %in% c("rmpdu","mpdpu","mpdpu"))){
-      mpdu <- spdu/nx
+      mpdu <- spdu/n
       if("rmpdu" %in% stats){
         rmpdu <- (mpdu)^.5
-        res <- c(res,"rmpdu" = rmpdu)
+        res[,"rmpdu"] <- rmpdu
       }
       if("mpdpu" %in% stats){
         mpdpu <- mpdu/msd
-        res <- c(res,"mpdpu" = mpdpu)
+        res[,"mpdpu"] <- mpdpu
       }
     }
 
     if("acu" %in% stats){
       acu <- 1 - (spdu/spod)
-      res <- c(res,"acu" = acu)
+      res[,"acu"] <- acu
     }
 
     if(any(stats %in% c("acs","rmpds","mpdps"))){
       spds <- ssd - spdu # systematic sum of product-difference
       if (any(stats %in% c("rmpds","mpdps"))){
-        mpds <- spds/nx
+        mpds <- spds/n
         if("rmpds" %in% stats){
           rmpds <- (mpds)^.5
-          res <- c(res,"rmpds" = rmpds)
+          res[,"rmpds"] <- rmpds
         }
         if("mpdps" %in% stats){
           mpdps <- mpds/msd
-          res <- c(res,"mpdps" = mpdps)
+          res[,"mpdps"] <- mpdps
         }
 
       }
       if("acs" %in% stats){
         acs <- 1 - (spds/spod)
-        res <- c(res,"acs" = acs)
+        res[,"acs"] <- acs
       }
     }
   }
-  res[stats]
+  res[is.nan(res)] <- NA
+  res[,stats]
 }
+

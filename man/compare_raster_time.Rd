@@ -82,7 +82,7 @@ PROBA  <- writeRaster(stack(f_PROBA),filename = rasterTmpFile())
 
 # Compare temporal consistency
 # Use the 'cores' to speed up processing!
-ct <- compare_raster_time(SPOT,PROBA,cores = 8)
+ct <- compare_raster_time(SPOT,PROBA)
 # plot
 brks <- c(0,.05,.1,.2,.3,.7)
 nb <- length(brks)-1
@@ -113,8 +113,8 @@ plot(ct_Quarter)
 Antoine Stevens
 }
 \references{
-Ji, L., and Gallo, K. (2006). An Agreement Coefficient for Image Comparison. Photogrammetric Engineering & Remote Sensing 72, 823–833.
-Meroni, M., Atzberger, C., Vancutsem, C., Gobron, N., Baret, F., Lacaze, R., Eerens, H., and Leo, O. (2013). Evaluation of Agreement Between Space Remote Sensing SPOT-VEGETATION fAPAR Time Series. IEEE Transactions on Geoscience and Remote Sensing 51, 1951–1962.
+Ji, L., and Gallo, K. (2006). An Agreement Coefficient for Image Comparison. Photogrammetric Engineering & Remote Sensing 72, 823-833.
+Meroni, M., Atzberger, C., Vancutsem, C., Gobron, N., Baret, F., Lacaze, R., Eerens, H., and Leo, O. (2013). Evaluation of Agreement Between Space Remote Sensing SPOT-VEGETATION fAPAR Time Series. IEEE Transactions on Geoscience and Remote Sensing 51, 1951-1962.
 Meroni M., Fasbender D., Balaghi et al. (2015). Testing VGT data continuity between SPOT and PROBA-V missions for operational yield forecasting in North African countries. JRC Technical Report, 28 p.
 }
 
