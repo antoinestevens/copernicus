@@ -200,7 +200,7 @@ compare_raster_time <- function(x,y,
 #' x (lon), y (lat), z (time). The analysis is performed layer by layer. At a given z, an entire layer is extracted in
 #' in the two rasters and the two layers are compared using a set of statistics. This results in a time serie for
 #' each computed statistic, depicting the temporal profile (seasonality) of the spatial coherence (agreement) between the two datasets.
-#' @usage compare_raster_space(x,y,lc,stats= ,filename = rasterTmpFile(),...)
+#' @usage compare_raster_space(x,y,lc,stats)
 #' @param x A \code{\link[raster]{Raster-class}} object. Better be a \code{RasterBrick}, for faster computing
 #' @param y Another \code{\link[raster]{Raster-class}} object to compare with the first one
 #' @param lc An optional \code{\link[raster]{raster}} object giving classes for which separate statistics are retrieved
