@@ -10,7 +10,9 @@ Description: Provides access to the COPERNICUS Global Land Service (http://land.
     Fraction of Absorbed Photosynthetically Active Radiation, Vegetation Condition Index, Vegetation Productivity Index,
     Dry Matter Productivity, and Burnt Areas.
     The package provides functions to (i) download h5 files based on location (COPERNICUS tiling system),
-    and (ii) convert (to tif), subset and project the downloaded files.
+    (ii) convert (to tif), subset and project the downloaded files and (iii) compare the spatial and temporal agreement of
+    two RasterBrick or RasterStack objects using the statistics described in
+    Ji and Gallo (2006) Photogrammetric Engineering & Remote Sensing 72, 823-833
     The user should register on the data portal to access data.
     Pieces of code are taken/inspired from the MODIS package (v0.10-31): https://r-forge.r-project.org/R/?group_id=1252),
     Function arguments follow the same naming as in MODIS, as much as possible.
@@ -26,6 +28,7 @@ Imports:
     iterators,
     lubridate,
     magrittr,
+    matrixStats,
     raster,
     rgdal,
     rgeos,

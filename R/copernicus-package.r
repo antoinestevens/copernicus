@@ -25,6 +25,10 @@
 #' install GDAL.
 #' Quality Flags can be extracted with \code{\link{convert_qf_copernicus}}.
 #'
+#' @section Product comparison:
+#' In addition to data access and extraction, \code{copernicus} allows to compare the spatial and temporal agreement between two
+#' RasterBrick or RasterStack objects, see \code{\link{compare_raster_time}} and \code{\link{compare_raster_space}}
+#'
 #' @section Package options:
 #' Some of the package default options are set with \code{\link{copernicus_options}}, such as the download path, user name and password.
 #'

@@ -18,8 +18,10 @@
 #' @author Antoine Stevens
 #' @examples
 #' # URL's for LAI product, for JAN 2014 and tiles (h=19,v=3) and (h=20,v=4)
-#' get_url_copernicus(product = 'LAI',begin = '20140101', end = '20140131',tileH = 19:20, tileV = 3:4)
-#' get_url_copernicus(product = 'NDVI_V2',begin = '20130101', end = '20130131',tileH = 19:20, tileV = 3:4)
+#' get_url_copernicus(product = 'LAI',begin = '20140101', end = '20140131',
+#'                    tileH = 19:20, tileV = 3:4)
+#' get_url_copernicus(product = 'NDVI_V2',begin = '20130101', end = '20130131',
+#'                    tileH = 19:20, tileV = 3:4)
 #' @export
 get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR",
     "VCI", "VPI", "DMP", "BA"), begin, end, tileH, tileV, groupByDate = FALSE, server = copernicus_options("server"),
