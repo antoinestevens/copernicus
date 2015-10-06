@@ -29,7 +29,7 @@ Imports:
     lubridate,
     magrittr,
     matrixStats,
-    parallel,
+    snow,
     raster,
     rgdal,
     rgeos,

@@ -11,7 +11,7 @@ compare_raster_time(x,y,stats,FUN = NULL,filename=rasterTmpFile(),cores,...)
 
 \item{y}{Another \code{\link[raster]{Raster-class}} object to compare with the first one}
 
-\item{stats}{A character \code{vector} with one or more of the following: 'missing_x','missing_y', 'cor',
+\item{stats}{A character \code{vector} with one or more of the following: 'cor',
 'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details}
 
 \item{FUN}{An optional function to be applied on the \code{z} slot of the input \code{x} and \code{y} (can be set with
@@ -38,8 +38,6 @@ each computed statistic, depicting the spatial variability of the temporal coher
 \details{
 The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 \itemize{
-   \item{\code{missing_x}}{ Number of missing values in the \code{x} raster}
-   \item{\code{missing_y}}{ Number of missing valuse in the \code{y} raster}
    \item{\code{cor}}{ Correlation coefficient}
    \item{\code{ax}}{ Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
    \item{\code{ay}}{ Intercept of the GMFR model y = a + bx}

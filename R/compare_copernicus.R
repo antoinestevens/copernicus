@@ -6,7 +6,7 @@
 #' @usage compare_raster_time(x,y,stats,FUN = NULL,filename=rasterTmpFile(),cores,...)
 #' @param x A \code{\link[raster]{Raster-class}} object. Better be a \code{RasterBrick}, for faster computing
 #' @param y Another \code{\link[raster]{Raster-class}} object to compare with the first one
-#' @param stats A character \code{vector} with one or more of the following: 'missing_x','missing_y', 'cor',
+#' @param stats A character \code{vector} with one or more of the following: 'cor',
 #' 'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details
 #' @param FUN An optional function to be applied on the \code{z} slot of the input \code{x} and \code{y} (can be set with
 #' \code{\link[raster]{setZ}}, to group statistics according to the resulting classes. If provided, only one
@@ -17,8 +17,6 @@
 #' @details
 #' The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 #' \itemize{
-#'    \item{\code{missing_x}}{ Number of missing values in the \code{x} raster}
-#'    \item{\code{missing_y}}{ Number of missing valuse in the \code{y} raster}
 #'    \item{\code{cor}}{ Correlation coefficient}
 #'    \item{\code{ax}}{ Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
 #'    \item{\code{ay}}{ Intercept of the GMFR model y = a + bx}
@@ -97,7 +95,7 @@
 #'
 #' @export
 compare_raster_time <- function(x,y,
-                                stats = c("missing_x","missing_y", "cor", "ax", "ay", "bx", "by", "ac","acu", "acs", "mbe", "rmsd", "rmspd",  "rmpdu", "rmpds","mpdpu","mpdps"),
+                                stats = c("cor", "ax", "ay", "bx", "by", "ac","acu", "acs", "mbe", "rmsd", "rmspd",  "rmpdu", "rmpds","mpdpu","mpdps"),
                                 FUN = NULL,filename=rasterTmpFile(),cores,...){
 
   stats <- match.arg(stats,several.ok = TRUE)
@@ -147,24 +145,24 @@ compare_raster_time <- function(x,y,
     on.exit(endCluster())
 
     # send expr and data to cluster nodes
-    parallel::clusterEvalQ(cl,library(matrixStats))
-    parallel::clusterExport(cl,".compare_xy")
+    snow::clusterEvalQ(cl,library(matrixStats))
+    snow::clusterExport(cl,".compare_xy")
 
     # number of blocks
     tr <- blockSize(x, minblocks=cores)
 
     for (i in 1:cores)
-      parallel:::sendCall(cl[[i]],.compare_time,list(i = i, x = x, y = y, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=i)
+      snow::sendCall(cl[[i]],.compare_time,list(i = i, x = x, y = y, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=i)
 
     for (i in 1:tr$n) {
-      d <- parallel:::recvOneData(cl);
+      d <- snow::recvOneData(cl);
       if (!d$value$success)
         stop("Cluster error in Row: ", tr$row[d$value$tag],"\n")
 
       b[[1]] <- writeValues(b[[1]], d$value$value, tr$row[d$value$tag])
       ni <- cores + i
       if (ni <= tr$n)
-        parallel:::sendCall(cl[[d$node]],.compare_time,list(i = ni, x = x, y = y, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=ni)
+        snow::sendCall(cl[[d$node]],.compare_time,list(i = ni, x = x, y = y, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=ni)
     }
   }
 
@@ -203,12 +201,10 @@ compare_raster_time <- function(x,y,
 #' @param x A \code{\link[raster]{Raster-class}} object. Better be a \code{RasterBrick}, for faster computing
 #' @param y Another \code{\link[raster]{Raster-class}} object to compare with the first one
 #' @param lc An optional \code{\link[raster]{raster}} object giving classes for which separate statistics are retrieved
-#' @param stats A character \code{vector} with one or more of the following: 'missing_x','missing_y', 'cor',
+#' @param stats A character \code{vector} with one or more of the following: 'cor',
 #' 'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details
 #' The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 #' \itemize{
-#'    \item{\code{missing_x}}{ Number of missing values in the \code{x} raster}
-#'    \item{\code{missing_y}}{ Number of missing valuse in the \code{y} raster}
 #'    \item{\code{cor}}{ Correlation coefficient}
 #'    \item{\code{ax}}{ Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
 #'    \item{\code{ay}}{ Intercept of the GMFR model y = a + bx}
@@ -274,7 +270,7 @@ compare_raster_time <- function(x,y,
 #'
 #' @export
 compare_raster_space <- function(x,y,lc,
-                                 stats= c("missing_x","missing_y", "cor", "ax", "ay", "bx", "by", "ac", "acu", "acs", "mbe" ,"rmsd", "rmspd", "rmpdu", "rmpds","mpdpu","mpdps")){
+                                 stats= c("cor", "ax", "ay", "bx", "by", "ac", "acu", "acs", "mbe" ,"rmsd", "rmspd", "rmpdu", "rmpds","mpdpu","mpdps")){
   stats <- match.arg(stats,several.ok = TRUE)
 
   if(!inherits(x,"Raster"))
@@ -338,15 +334,6 @@ compare_raster_space <- function(x,y,lc,
   py <- ncol(y);ny <- nrow(y) # dims
   res <- matrix(nrow = ny, ncol = length(stats))
   colnames(res) <- stats
-
-  if("missing_x" %in% stats){
-    mix <- matrixStats::rowCounts(x,value = NA) # much faster
-    res[,"missing_x"] <- mix
-  }
-  if("missing_y" %in% stats){
-    miy <- matrixStats::rowCounts(y,value = NA)
-    res[,"missing_y"] <- miy
-  }
 
   # keep only complete cases
   x[is.na(y)] <- NA
