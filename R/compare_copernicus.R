@@ -17,23 +17,23 @@
 #' @details
 #' The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 #' \itemize{
-#'    \item{\code{missing_x}}{Number of missing values in the \code{x} raster}
-#'    \item{\code{missing_y}}{Number of missing valuse in the \code{y} raster}
-#'    \item{\code{cor}}{Correlation coefficient}
-#'    \item{\code{ax}}{Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
-#'    \item{\code{ay}}{Intercept of the GMFR model y = a + bx}
-#'    \item{\code{bx}}{Coefficient of the GMFR model x = a + by}
-#'    \item{\code{by}}{Coefficient of the GMFR model y = a + bx}
-#'    \item{\code{ac}}{Agreement Coefficient}
-#'    \item{\code{acu}}{Unsystematic Agreement Coefficient}
-#'    \item{\code{acs}}{Systematic Agreement Coefficient}
-#'    \item{\code{mbe}}{Mean Bias Error}
-#'    \item{\code{rmsd}}{Root Mean Square Deviation}
-#'    \item{\code{rmspd}}{Root Mean Square Deviation in percentage of mean y}
-#'    \item{\code{rmpdu}}{Unsystematic Square Root of Mean Product-difference }
-#'    \item{\code{rmpds}}{Systematic Square Root of Mean Product-difference}
-#'    \item{\code{mpdpu}}{Proportion of the unsystematic differences over the total difference}
-#'    \item{\code{mpdps}}{Proportion of the systematic differences over the total difference}
+#'    \item{\code{missing_x}}{ Number of missing values in the \code{x} raster}
+#'    \item{\code{missing_y}}{ Number of missing valuse in the \code{y} raster}
+#'    \item{\code{cor}}{ Correlation coefficient}
+#'    \item{\code{ax}}{ Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
+#'    \item{\code{ay}}{ Intercept of the GMFR model y = a + bx}
+#'    \item{\code{bx}}{ Coefficient of the GMFR model x = a + by}
+#'    \item{\code{by}}{ Coefficient of the GMFR model y = a + bx}
+#'    \item{\code{ac}}{ Agreement Coefficient}
+#'    \item{\code{acu}}{ Unsystematic Agreement Coefficient}
+#'    \item{\code{acs}}{ Systematic Agreement Coefficient}
+#'    \item{\code{mbe}}{ Mean Bias Error}
+#'    \item{\code{rmsd}}{ Root Mean Square Deviation}
+#'    \item{\code{rmspd}}{ Root Mean Square Deviation in percentage of mean y}
+#'    \item{\code{rmpdu}}{ Unsystematic Square Root of Mean Product-difference }
+#'    \item{\code{rmpds}}{ Systematic Square Root of Mean Product-difference}
+#'    \item{\code{mpdpu}}{ Proportion of the unsystematic differences over the total difference}
+#'    \item{\code{mpdps}}{ Proportion of the systematic differences over the total difference}
 #' }
 #' @return A \code{\link[raster]{Raster-class}} object with layers correponding to \code{stats}. If \code{FUN} argument
 #' is provided, layers correponds to the groups resulting from applying \code{FUN} to the \code{z} slot of input rasters \code{x}
@@ -207,23 +207,23 @@ compare_raster_time <- function(x,y,
 #' 'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details
 #' The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 #' \itemize{
-#'    \item{\code{missing_x}}{Number of missing values in the \code{x} raster}
-#'    \item{\code{missing_y}}{Number of missing valuse in the \code{y} raster}
-#'    \item{\code{cor}}{Correlation coefficient}
-#'    \item{\code{ax}}{Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
-#'    \item{\code{ay}}{Intercept of the GMFR model y = a + bx}
-#'    \item{\code{bx}}{Coefficient of the GMFR model x = a + by}
-#'    \item{\code{by}}{Coefficient of the GMFR model y = a + bx}
-#'    \item{\code{ac}}{Agreement Coefficient}
-#'    \item{\code{acu}}{Unsystematic Agreement Coefficient}
-#'    \item{\code{acs}}{Systematic Agreement Coefficient}
-#'    \item{\code{mbe}}{Mean Bias Error}
-#'    \item{\code{rmsd}}{Root Mean Square Deviation}
-#'    \item{\code{rmspd}}{Root Mean Square Deviation in percentage of mean y}
-#'    \item{\code{rmpdu}}{Unsystematic Square Root of Mean Product-difference }
-#'    \item{\code{rmpds}}{Systematic Square Root of Mean Product-difference}
-#'    \item{\code{mpdpu}}{Proportion of the unsystematic differences over the total difference}
-#'    \item{\code{mpdps}}{Proportion of the systematic differences over the total difference}
+#'    \item{\code{missing_x}}{ Number of missing values in the \code{x} raster}
+#'    \item{\code{missing_y}}{ Number of missing valuse in the \code{y} raster}
+#'    \item{\code{cor}}{ Correlation coefficient}
+#'    \item{\code{ax}}{ Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
+#'    \item{\code{ay}}{ Intercept of the GMFR model y = a + bx}
+#'    \item{\code{bx}}{ Coefficient of the GMFR model x = a + by}
+#'    \item{\code{by}}{ Coefficient of the GMFR model y = a + bx}
+#'    \item{\code{ac}}{ Agreement Coefficient}
+#'    \item{\code{acu}}{ Unsystematic Agreement Coefficient}
+#'    \item{\code{acs}}{ Systematic Agreement Coefficient}
+#'    \item{\code{mbe}}{ Mean Bias Error}
+#'    \item{\code{rmsd}}{ Root Mean Square Deviation}
+#'    \item{\code{rmspd}}{ Root Mean Square Deviation in percentage of mean y}
+#'    \item{\code{rmpdu}}{ Unsystematic Square Root of Mean Product-difference }
+#'    \item{\code{rmpds}}{ Systematic Square Root of Mean Product-difference}
+#'    \item{\code{mpdpu}}{ Proportion of the unsystematic differences over the total difference}
+#'    \item{\code{mpdps}}{ Proportion of the systematic differences over the total difference}
 #' }
 #' @return an \code{array} of statistics with 1st dimension corresponding to layers in input rasters, 2nd dimension to
 #' \code{stats} and optional 3rd dimension to classes defined by \code{lc}
