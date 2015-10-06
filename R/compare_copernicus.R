@@ -185,7 +185,6 @@ compare_raster_time <- function(x,y,
     res <- matrix(NA,nrow = nrow(x),ncol = nlevels(factor(f)))
     for(k in 1:nlevels(factor(f))){
       id <-  factor(f) == levels(factor(f))[k]
-      print(id)
       xk <- x[,id]
       yk <- y[,id]
       res[,k] <- .compare_xy(xk,yk,stats)
