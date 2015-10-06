@@ -136,7 +136,6 @@ compare_raster_time <- function(x,y,
   b <- list()
   b[[1]] <- brick(x,nl=nl, values=FALSE)
   b[[1]] <- writeStart(b[[1]], filename = filename,...)
-
   if (missing(cores)){
     tr <- blockSize(x,n = nlayers(x)*2)
     for ( i in seq_along(tr$row))
@@ -185,7 +184,8 @@ compare_raster_time <- function(x,y,
   } else {
     res <- matrix(NA,nrow = nrow(x),ncol = nlevels(factor(f)))
     for(k in 1:nlevels(factor(f))){
-      id <-  factor(f) == factor(f)[k]
+      id <-  factor(f) == levels(factor(f))[k]
+      print(id)
       xk <- x[,id]
       yk <- y[,id]
       res[,k] <- .compare_xy(xk,yk,stats)
@@ -206,8 +206,6 @@ compare_raster_time <- function(x,y,
 #' @param lc An optional \code{\link[raster]{raster}} object giving classes for which separate statistics are retrieved
 #' @param stats A character \code{vector} with one or more of the following: 'missing_x','missing_y', 'cor',
 #' 'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details
-#' @param filename name of the file where the output raster should be saved. Default is created through \code{\link[raster]{rasterTmpFile}}
-#' @param ... arguments passed to \code{\link[raster]{writeRaster}}
 #' The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 #' \itemize{
 #'    \item{\code{missing_x}}{Number of missing values in the \code{x} raster}
@@ -469,6 +467,6 @@ compare_raster_space <- function(x,y,lc,
     }
   }
   res[is.nan(res)] <- NA
-  res[,stats]
+  res[,stats,drop=FALSE]
 }
 

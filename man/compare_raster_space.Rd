@@ -4,7 +4,7 @@
 \alias{compare_raster_space}
 \title{Compare Spatial Consistency of Two Rasters}
 \usage{
-compare_raster_space(x,y,lc,stats= ,filename = rasterTmpFile(),...)
+compare_raster_space(x,y,lc,stats)
 }
 \arguments{
 \item{x}{A \code{\link[raster]{Raster-class}} object. Better be a \code{RasterBrick}, for faster computing}
@@ -14,11 +14,7 @@ compare_raster_space(x,y,lc,stats= ,filename = rasterTmpFile(),...)
 \item{lc}{An optional \code{\link[raster]{raster}} object giving classes for which separate statistics are retrieved}
 
 \item{stats}{A character \code{vector} with one or more of the following: 'missing_x','missing_y', 'cor',
-'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details}
-
-\item{filename}{name of the file where the output raster should be saved. Default is created through \code{\link[raster]{rasterTmpFile}}}
-
-\item{...}{arguments passed to \code{\link[raster]{writeRaster}}
+'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details
 The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 \itemize{
    \item{\code{missing_x}}{Number of missing values in the \code{x} raster}
