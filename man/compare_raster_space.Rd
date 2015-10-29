@@ -13,10 +13,11 @@ compare_raster_space(x,y,lc,stats)
 
 \item{lc}{An optional \code{\link[raster]{raster}} object giving classes for which separate statistics are retrieved}
 
-\item{stats}{A character \code{vector} with one or more of the following: 'cor',
+\item{stats}{A character \code{vector} with one or more of the following: 'missing', 'cor',
 'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details
 The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 \itemize{
+   \item{\code{missing}}{ Number of missing values in the \code{x} and \code{y} raster}
    \item{\code{cor}}{ Correlation coefficient}
    \item{\code{ax}}{ Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
    \item{\code{ay}}{ Intercept of the GMFR model y = a + bx}

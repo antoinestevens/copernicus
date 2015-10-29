@@ -4,23 +4,24 @@
 \alias{compare_raster_time}
 \title{Compare Temporal Consistency of two Rasters}
 \usage{
-compare_raster_time(x,y,stats,FUN = NULL,filename=rasterTmpFile(),cores,...)
+compare_raster_time(x,y,stats,FUN = NULL,cl = NULL,filename=rasterTmpFile(),...)
 }
 \arguments{
 \item{x}{A \code{\link[raster]{Raster-class}} object. Better be a \code{RasterBrick}, for faster computing}
 
 \item{y}{Another \code{\link[raster]{Raster-class}} object to compare with the first one}
 
-\item{stats}{A character \code{vector} with one or more of the following: 'cor',
-'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps'. See details}
+\item{stats}{A character \code{vector} with one or more of the following: 'missing', 'cor',
+'ax', 'ay', 'bx', 'by', 'ac','acu', 'acs', 'mbe', 'rmsd', 'rmspd',  'rmpdu', 'rmpds','mpdpu','mpdps',
+'smoothness','atime','btime'. See details}
 
 \item{FUN}{An optional function to be applied on the \code{z} slot of the input \code{x} and \code{y} (can be set with
 \code{\link[raster]{setZ}}, to group statistics according to the resulting classes. If provided, only one
 \code{stats} is allowed. See Examples section.}
 
-\item{filename}{name of the file where the output raster should be saved. Default is created through \code{\link[raster]{rasterTmpFile}}}
+\item{cl}{cluster object for parallel processing. Default is \code{NULL}}
 
-\item{cores}{number of cores used when computing statistics. Default is 1.}
+\item{filename}{name of the file where the output raster should be saved. Default is created through \code{\link[raster]{rasterTmpFile}}}
 
 \item{...}{arguments passed to \code{\link[raster]{writeRaster}}}
 }
@@ -38,6 +39,7 @@ each computed statistic, depicting the spatial variability of the temporal coher
 \details{
 The \code{stats} arguments can take one or more of the following values (see Ji and Gallo, 2006):
 \itemize{
+   \item{\code{missing}}{ Number of missing values in the \code{x} and \code{y} raster}
    \item{\code{cor}}{ Correlation coefficient}
    \item{\code{ax}}{ Intercept of the Geometric Mean Functional Relationship (GMFR) model x = a + by}
    \item{\code{ay}}{ Intercept of the GMFR model y = a + bx}
@@ -53,6 +55,9 @@ The \code{stats} arguments can take one or more of the following values (see Ji 
    \item{\code{rmpds}}{ Systematic Square Root of Mean Product-difference}
    \item{\code{mpdpu}}{ Proportion of the unsystematic differences over the total difference}
    \item{\code{mpdps}}{ Proportion of the systematic differences over the total difference}
+   \item{\code{smoothness}}{ Mean absolute value of the first derivative over time}
+   \item{\code{atime}}{ Intercept of the regression over time}
+   \item{\code{btime}}{ Coefficient of the regression over time}
 }
 }
 \examples{
@@ -79,7 +84,7 @@ SPOT  <- writeRaster(stack(f_SPOT),filename = rasterTmpFile())
 PROBA  <- writeRaster(stack(f_PROBA),filename = rasterTmpFile())
 
 # Compare temporal consistency
-# Use the 'cores' to speed up processing!
+# Use the 'cl' option to speed up processing!
 ct <- compare_raster_time(SPOT,PROBA)
 # plot
 brks <- c(0,.05,.1,.2,.3,.7)
