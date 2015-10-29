@@ -1,11 +1,12 @@
 #' @title Convert bit values from a QFLAG COPERNICUS product
 #' @description Convert a Raster* object representing QFLAG bit values to a Raster* with two categories representing flagged and non-flagged pixels
 #' @usage
-#' convert_qf_copernicus(r,qf,filename=rasterTmpFile(),...)
+#' convert_qf_copernicus(r,qf,cl = NULL, filename=rasterTmpFile(),...)
 #' @param r A \code{\link[raster]{Raster-class}} object
 #' @param qf Quality Flag to be extracted. Can be more than one of these:
 #' 'sea','snow','suspect','aero_status_mixed','aero_source_climato','input_invalid','lai_invalid','fapar_invalid','fcover_invalid','b2_saturation','b3_saturation','filtered','gap_filled','ndvi_invalid'
-#' @param filename Character vector giving the name of the output raster to save. 
+#' @param cl cluster object for parallel processing. Default is \code{NULL}
+#' @param filename Character vector giving the name of the output raster to save.
 #'        Default is created through \code{\link[raster]{rasterTmpFile}}
 #' @param ... arguments passed to \code{\link[raster]{writeRaster}}
 #' @return A \code{\link[raster]{Raster-class}} object with two values (1,0), representing respectively pixels that are flagged by at least one of the give \code{qf},
@@ -42,8 +43,12 @@
 #' plot(bad)
 #' }
 #' @export
-convert_qf_copernicus <- function(r, qf, filename=rasterTmpFile(),...) {
+convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...) {
 
+    if(!is.null(cl))
+      if(!"cluster"%in%class(cl))
+        stop("cl should be a cluster object. See ?getCluster")
+  
     if (!inherits(r, "Raster"))
       stop("r should be a Raster* object")
 
@@ -52,26 +57,48 @@ convert_qf_copernicus <- function(r, qf, filename=rasterTmpFile(),...) {
         "b2_saturation", "b3_saturation", "filtered", "gap_filled", "ndvi_invalid"))
     if (!sum(q))
         stop("qf should match at least one (or possibly more) of these : c('sea','snow','suspect','aero_status_mixed','aero_source_climato','input_invalid','lai_invalid','fapar_invalid','fcover_invalid','b2_saturation','b3_saturation','filtered','gap_filled','ndvi_invalid')")
-    
+
     b <- list()
     b[[1]] <- brick(r,nl=nlayers(r), values=FALSE)
     b[[1]] <- writeStart(b[[1]], filename = filename,...)
     
-    tr <- blockSize(r)
-    
-    for ( i in seq_along(tr$row))
-      b[[1]] <- writeValues(b[[1]], .convert_qf_cop(i = i, row = tr$row, nrows = tr$nrow,qf = q), tr$row[i])
-    
+    if(is.null(cl)){
+      tr <- blockSize(r)
+  
+      for ( i in seq_along(tr$row))
+        b[[1]] <- writeValues(b[[1]], .convert_qf_cop(i = i, r = r, row = tr$row, nrows = tr$nrow,qf = q), tr$row[i])
+    } else {
+      cores <- length(cl)
+      # send expr and data to cluster nodes
+      # number of blocks
+      tr <- blockSize(r, minblocks=cores)
+      for (i in 1:cores)
+        raster:::.sendCall(cl[[i]],.convert_qf_cop,list(i = i, r = r, row = tr$row, nrows = tr$nrow,pattern = pattern,qf = q),tag=i)
+      
+      for (i in 1:tr$n)
+      {
+        d <- raster:::.recvOneData(cl);
+        if (!d$value$success)
+          stop("Cluster error in Row: ", tr$row[d$value$tag],"\n")
+        
+        b[[1]] <- writeValues(b[[1]], d$value$value, tr$row[d$value$tag])
+        
+        ni <- cores + i
+        if (ni <= tr$n)
+          raster:::.sendCall(cl[[d$node]],.convert_qf_cop,list(i = ni, r = r, row = tr$row, nrows = tr$nrow,pattern = pattern,qf = q),tag=ni)
+      }
+    }
+
     for (a in seq_along(b))
       b[[a]] <- writeStop(b[[a]])
-    
+
     b <- brick(filename)
     names(b) <- names(r)
     b
 }
 
-.convert_qf_cop <- function(i,row,nrows,qf){
-  
+.convert_qf_cop <- function(i,r,row,nrows,qf){
+
   # Bit 1: Land/Sea Land Sea Bit 2: Snow status Clear Snow Bit 3: Suspect No suspect Suspect
   # Bit 4: Aerosol status Pure Mixed Bit 5: Aerosol source Modis Climato Bit 6: Input status
   # OK Out of range or invalid Bit 7: LAI status OK Out of range or invalid Bit 8: FAPAR
@@ -90,7 +117,7 @@ convert_qf_copernicus <- function(r, qf, filename=rasterTmpFile(),...) {
   colnames(bits) <- lev
   # bits <- bits[,-ncol(bits)] # remove the last column corresponding to 65535
   ids <- lev[as.logical(colSums(bits[qf, , drop = F]))]
-  nas <- which(val == 65535 ) # replace by NA
+  nas <- which(val == 65535L ) # replace by NA
   ids <- val %in% ids
   val[ids] <- 1
   val[!ids] <- 0

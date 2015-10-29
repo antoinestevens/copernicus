@@ -4,13 +4,15 @@
 \alias{convert_qf_copernicus}
 \title{Convert bit values from a QFLAG COPERNICUS product}
 \usage{
-convert_qf_copernicus(r,qf,filename=rasterTmpFile(),...)
+convert_qf_copernicus(r,qf,cl = NULL, filename=rasterTmpFile(),...)
 }
 \arguments{
 \item{r}{A \code{\link[raster]{Raster-class}} object}
 
 \item{qf}{Quality Flag to be extracted. Can be more than one of these:
 'sea','snow','suspect','aero_status_mixed','aero_source_climato','input_invalid','lai_invalid','fapar_invalid','fcover_invalid','b2_saturation','b3_saturation','filtered','gap_filled','ndvi_invalid'}
+
+\item{cl}{cluster object for parallel processing. Default is \code{NULL}}
 
 \item{filename}{Character vector giving the name of the output raster to save.
 Default is created through \code{\link[raster]{rasterTmpFile}}}
