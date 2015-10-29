@@ -156,15 +156,15 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
             outPath <- paste0(outPath, job) else outPath <- paste0(outPath, "/", job)
     }
     outPath <- normalizePath(outPath)
-
     cat("Output Directory = ", outPath, "\n")
     # fnames could be a list with file names, grouped by years,
-    # so we iterate over the list and for each element of the list, again
+    # so we iterate over the list and for each element of the list, once again
     f_h5 <- foreach(fgroup = iterators::iter(fnames), .combine = c)%do%{
-
+      
       # the layer loop is outside, to allow mosaiking
       # this is however not efficient, since the h5 is read several times
       foreach(layer = iterators::iter(layers),i = iterators::icount())%do%{
+
             src_dataset <- foreach(f = iterators::iter(fgroup),.combine = c)%do%{
 
                 finfo <- scan_file_copernicus(f)
@@ -184,8 +184,8 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 h5info <- rhdf5::h5ls(f_h5, all = T)
                 if(layer>nrow(h5info))
                   stop(paste0("Layer: ", layer, " does not exist in the h5 file"))
-                
-                info <- gdalUtils::gdalinfo(f_h5)
+
+                ginfo <- gdalUtils::gdalinfo(f_h5)
                 LAT <- stringr::str_subset(ginfo, "LAT") %>% stringr::str_replace(".+=", "") %>% as.numeric
                 LONG <- stringr::str_subset(ginfo, "LONG") %>% stringr::str_replace(".+=", "") %>% as.numeric
                 instrument <- stringr::str_subset(ginfo, "INSTRUMENT_ID") %>% stringr::str_replace(".+=", "")
@@ -206,7 +206,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 # (because one can have potentially -180 - (1/112)/2 )
                 # https://trac.osgeo.org/proj/wiki/GenParm
                 e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over")
-                
+
                 if (!is.null(extent)) {
 
                     # project to geographical coordinates if necessary
@@ -242,7 +242,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                     e_proj <- e_tile_proj
                     srcwin <- NULL
                 }
-                
+
                 if(nrow(h5info) == 1)
                   layer <- NULL # remove sd_index when there is only one layer, else gdal_translate gives an error
                 else
@@ -258,15 +258,15 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 }
                 cat(paste0("- ", h5info$name, "\n"))
 
-                dst_dataset <- sub("\\.grd$", ".tif", rasterTmpFile())
+                dst_dataset <- extension(rasterTmpFile(),"tif")
                 # http://land.copernicus.eu/global/faq/how-convert-swi-hdf5-data-geotiff
-                
+
                 args_to_gdal <- list(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = layer,
                                      srcwin = srcwin, a_ullr = e_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
                                      a_nodate = as.numeric(att$MISSING_VALUE))
-                
+
                 args_to_gdal <- args_to_gdal[!sapply(args_to_gdal,is.null)] # remove unnecessary arguments
-                
+
                 # convert
                 do.call(gdalUtils::gdal_translate,args_to_gdal)
 
@@ -291,7 +291,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                                    s_srs = "+init=epsg:32662", t_srs = t_srs, tr = tr, r = resamplingType, output_Raster = T,
                                    overwrite = TRUE)
               args_to_gdal <- args_to_gdal[!sapply(args_to_gdal,is.null)] # remove unnecessary arguments
-              
+
               r <- do.call(gdalUtils::gdalwarp,args_to_gdal)
             } else if (length(src_dataset)>1) {
               # mosaiking
