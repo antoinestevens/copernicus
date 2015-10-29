@@ -48,7 +48,7 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
     if(!is.null(cl))
       if(!"cluster"%in%class(cl))
         stop("cl should be a cluster object. See ?getCluster")
-  
+
     if (!inherits(r, "Raster"))
       stop("r should be a Raster* object")
 
@@ -61,10 +61,9 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
     b <- list()
     b[[1]] <- brick(r,nl=nlayers(r), values=FALSE)
     b[[1]] <- writeStart(b[[1]], filename = filename,...)
-    
+
     if(is.null(cl)){
       tr <- blockSize(r)
-  
       for ( i in seq_along(tr$row))
         b[[1]] <- writeValues(b[[1]], .convert_qf_cop(i = i, r = r, row = tr$row, nrows = tr$nrow,qf = q), tr$row[i])
     } else {
@@ -73,19 +72,19 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
       # number of blocks
       tr <- blockSize(r, minblocks=cores)
       for (i in 1:cores)
-        raster:::.sendCall(cl[[i]],.convert_qf_cop,list(i = i, r = r, row = tr$row, nrows = tr$nrow,pattern = pattern,qf = q),tag=i)
-      
+        snow::sendCall(cl[[i]],.convert_qf_cop,list(i = i, r = r, row = tr$row, nrows = tr$nrow,qf = q),tag=i)
+
       for (i in 1:tr$n)
       {
-        d <- raster:::.recvOneData(cl);
+        d <- snow::recvOneData(cl);
         if (!d$value$success)
           stop("Cluster error in Row: ", tr$row[d$value$tag],"\n")
-        
+
         b[[1]] <- writeValues(b[[1]], d$value$value, tr$row[d$value$tag])
-        
+
         ni <- cores + i
         if (ni <= tr$n)
-          raster:::.sendCall(cl[[d$node]],.convert_qf_cop,list(i = ni, r = r, row = tr$row, nrows = tr$nrow,pattern = pattern,qf = q),tag=ni)
+          snow::sendCall(cl[[d$node]],.convert_qf_cop,list(i = ni, r = r, row = tr$row, nrows = tr$nrow,qf = q),tag=ni)
       }
     }
 
@@ -93,6 +92,8 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
       b[[a]] <- writeStop(b[[a]])
 
     b <- brick(filename)
+    if(length(getZ(r)))
+      b <- setZ(b,getZ(r))
     names(b) <- names(r)
     b
 }
@@ -108,7 +109,7 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
   # 14: NDVI status Ok invalid
   val  <-  raster::getValues(r, row=row[i], nrows=nrows[i])
   lev <- sort(unique(as.vector(val)))
-  
+
   # there is 65535 possible values for Uint16
   bits <- sapply(lev, function(x) as.integer(intToBits(x)[1:14]))
   rownames(bits) <- c("sea", "snow", "suspect", "aero_status_mixed", "aero_source_climato",
