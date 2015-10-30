@@ -338,7 +338,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 r2_lev <- list(code = c("out_max", "out_min", "invalid"))
               }
               names(r2) <- paste0(names(r), "_flag")
-              # write to disk
+              # write to disk, with attribute table
               rgdal::writeGDAL(as(r2, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_",
                         layer_name, "_flag.tif"), f_h5), catNames = r2_lev, type = "Byte", mvFlag = 255)
             }
@@ -355,8 +355,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
               r <- (r - as.numeric(att$OFFSET))/as.numeric(att$SCALING_FACTOR)
 
             # write to disk
-             rgdal::writeGDAL(as(r, "SpatialGridDataFrame"), fname = sub("\\.h5$", paste0("_", layer_name,
-                ".tif"), f_h5))
+             writeRaster(r, filename = sub("\\.h5$", paste0("_", layer_name,".tif"), f_h5))
         }
         f_h5
     }
