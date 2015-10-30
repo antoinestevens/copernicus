@@ -172,7 +172,11 @@ compare_raster_time <- function(x,y,
 
   b <- list()
   b[[1]] <- brick(x,nl=nl, values=FALSE)
+  if(length(getZ(x)))
+    b[[1]] <- setZ(b[[1]],getZ(x))
+  names(b[[1]]) <-  fn
   b[[1]] <- writeStart(b[[1]], filename = filename,...)
+  
   if (is.null(cl)){
     tr <- blockSize(x,n = nlayers(x)*2)
     for ( i in seq_along(tr$row))
@@ -206,7 +210,6 @@ compare_raster_time <- function(x,y,
     b[[a]] <- writeStop(b[[a]])
 
   b <- brick(filename)
-  names(b) <-  fn
   b
 }
 

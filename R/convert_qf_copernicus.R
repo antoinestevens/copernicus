@@ -60,6 +60,9 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
 
     b <- list()
     b[[1]] <- brick(r,nl=nlayers(r), values=FALSE)
+    if(length(getZ(r)))
+      b[[1]] <- setZ(b[[1]],getZ(r))
+    names(b[[1]]) <- names(r)
     b[[1]] <- writeStart(b[[1]], filename = filename,...)
 
     if(is.null(cl)){
@@ -92,9 +95,6 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
       b[[a]] <- writeStop(b[[a]])
 
     b <- brick(filename)
-    if(length(getZ(r)))
-      b <- setZ(b,getZ(r))
-    names(b) <- names(r)
     b
 }
 
