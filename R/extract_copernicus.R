@@ -116,6 +116,9 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
     if (missing(extent))
         extent <- NULL
 
+    if (missing(extend))
+      extend <- NULL
+
     if(class(outProj)=="CRS")
       outProj <- rgdal::CRSargs(outProj)
 
@@ -230,7 +233,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                       e <- extent(extent)
                     }
                     # now, add row/col (or pix) at each side if requested by the user
-                    if (!missing(extend)) {
+                    if (!is.null(extend)) {
 
                         if (length(extend) == 1)
                           extend <- rep(extend, 2)
