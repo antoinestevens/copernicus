@@ -170,7 +170,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
 
     # fnames could be a list with file names, grouped by years,
     # so we iterate over the list and for each element of the list, once again
-    f_h5 <- foreach(fgroup = iterators::iter(fnames), .combine = c)%mydo%{
+    f_h5 <- foreach(fgroup = iterators::iter(fnames), .combine = c, .packages = c("iterators","gdalUtils","stringr","rgdal","rhdf5","raster"))%mydo%{
 
       # the layer loop is outside, to allow mosaiking
       # this is however not efficient, since the h5 is read several times
