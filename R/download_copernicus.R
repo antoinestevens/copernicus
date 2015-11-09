@@ -2,7 +2,7 @@
 #' @description
 #' Download COPERNICUS products, for a given period of time and tile(s)
 #' @usage
-#' download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password,...)
+#' download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password,allowParallel = FALSE,...)
 #' @param product One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 #' 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 #' 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)
@@ -15,6 +15,7 @@
 #' @param outPath Path where downloaded files should be stored. Default set via \code{copernicus_options('downloadPath')}
 #' @param user user name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}
 #' @param password password associated with user name to access COPERNICUS data portal. Default set via \code{copernicus_options('password')}
+#' @param allowParallel Logical. If a \code{foreach} parallel backend is loaded and available, should the function use it? Default is \code{FALSE}.
 #' @param ... argument passed to \code{\link{get_url_copernicus}}, such as groupByDate
 #' @details If target files are already present in the \code{outPath} directory, they are not downloaded.
 #' One should choose to use either an extent or pairs of (H,V) values. If extent is provided, tileH and tileV are not used.
@@ -37,7 +38,16 @@
 #' @export
 download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR", "VCI",
     "VPI", "DMP", "BA"), begin, end, extent, tileH, tileV, outPath = copernicus_options("downloadPath"),
-    user = copernicus_options("user"), password = copernicus_options("password"),...) {
+    user = copernicus_options("user"), password = copernicus_options("password"), allowParallel = FALSE, ...) {
+
+    if(!is.logical(allowParallel))
+      stop("allowParallel should be a logical")
+
+    if(allowParallel){
+      `%mydo%` <- foreach::`%dopar%`
+    } else {
+      `%mydo%` <- foreach::`%do%`
+    }
 
     if (copernicus_options("user") == "" | copernicus_options("password") == "")
         stop("Set a user and password via 'copernicus_options()' to access COPERNICUS data portal")
@@ -101,7 +111,7 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     u <- u[id]
 
     if (length(u)) {
-        foreach(i = 1:length(u))%do%{
+        foreach(i = 1:length(u))%mydo%{
             print(paste("Downloading:", d[id][i]))
             # download data
             curl::curl_download(url = u[i], dest = paste0(outPath, "/", d[id][i]), handle = h)
