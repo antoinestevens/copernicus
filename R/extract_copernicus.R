@@ -2,7 +2,7 @@
 #' @description Un-zip, extract the given layers of COPERNICUS h5 files to tif files. The function can also crop, project and apply gain and offset values
 #' @usage
 #' extract_copernicus(fnames,extent,extend,convertDN = TRUE,outProj,pixelSize,resamplingType,
-#'                    outPath,job,gdalPath,zip = TRUE,layers = 1, allowParallel = FALSE)
+#'                    outPath,job,gdalPath,zip = TRUE,layers = 1, allowParallel = FALSE,...)
 #' @param fnames \code{character} vector of the file names to transform (with a zip or h5 extension).
 #' If \code{fnames} is a list of vector of file names, then files are automatically mosaicked for each element of the list
 #' @param extent A \code{\link[raster]{Raster-class}}, \code{\link[raster]{Extent}} or \code{\link[sp]{SpatialPolygons-class}} giving the subwindow to crop the image to.
@@ -23,6 +23,7 @@
 #' @param layers \code{numeric} vector indicating the index/indices of the layer(s) to extract from the h5 file(s). Default set to 1
 #'        See eg http://land.copernicus.eu/global/products/ndvi for more details.
 #' @param allowParallel Logical. If a \code{foreach} parallel backend is loaded and available, should the function use it? Default is \code{FALSE}.
+#' @param ... arguments passed to \code{\link[raster]{writeRaster}}
 #' @return Return invisibly the list of extracted h5 files. If files are mosaicked, tiles numbers are dropped from the names
 #' @author Antoine Stevens
 #' @examples
@@ -106,7 +107,7 @@
 extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj = copernicus_options("outProj"),
     pixelSize = copernicus_options("pixelSize"), resamplingType = c("near", "bilinear", "cubic",
         "cubicspline"), outPath = copernicus_options("outPath"), job = "", gdalPath = copernicus_options("gdalPath"),
-    zip = TRUE, layers = 1, allowParallel = FALSE) {
+    zip = TRUE, layers = 1, allowParallel = FALSE, ...) {
 
     gdalUtils::gdal_setInstallation(search_path = gdalPath)  # set gdal path for gdalUtils
 
@@ -369,7 +370,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
               r <- (r - as.numeric(att$OFFSET))/as.numeric(att$SCALING_FACTOR)
 
             # write to disk
-             writeRaster(r, filename = sub("\\.h5$", paste0("_", layer_name,".tif"), f_h5))
+             writeRaster(r, filename = sub("\\.h5$", paste0("_", layer_name,".tif"), f_h5), ...)
         }
         f_h5
     }

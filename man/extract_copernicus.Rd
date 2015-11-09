@@ -5,7 +5,7 @@
 \title{Extract and process COPERNICUS h5 files}
 \usage{
 extract_copernicus(fnames,extent,extend,convertDN = TRUE,outProj,pixelSize,resamplingType,
-                   outPath,job,gdalPath,zip = TRUE,layers = 1, allowParallel = FALSE)
+                   outPath,job,gdalPath,zip = TRUE,layers = 1, allowParallel = FALSE,...)
 }
 \arguments{
 \item{fnames}{\code{character} vector of the file names to transform (with a zip or h5 extension).
@@ -40,6 +40,8 @@ if the \code{extent} argument is set, with an object of class \code{\link[raster
 See eg http://land.copernicus.eu/global/products/ndvi for more details.}
 
 \item{allowParallel}{Logical. If a \code{foreach} parallel backend is loaded and available, should the function use it? Default is \code{FALSE}.}
+
+\item{...}{arguments passed to \code{\link[raster]{writeRaster}}}
 }
 \value{
 Return invisibly the list of extracted h5 files. If files are mosaicked, tiles numbers are dropped from the names
