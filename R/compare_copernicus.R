@@ -187,7 +187,7 @@ compare_raster_time <- function(x,y,
 
     cores <- length(cl)
     # send expr and data to cluster nodes
-    parallel::clusterEvalQ(cl,library(matrixStats))
+    # parallel::clusterEvalQ(cl,library(matrixStats))
     parallel::clusterExport(cl,".compare_xy")
 
     # number of blocks
@@ -384,21 +384,21 @@ compare_raster_space <- function(x,y,lc,
   py <- ncol(y);ny <- nrow(y) # dims
   res <- matrix(nrow = ny, ncol = length(stats))
   colnames(res) <- stats
-  
+
   nax <- is.na(x)
   nay <- is.na(y)
-  
+
   mix <- matrixStats::rowCounts(nax)# much faster
   miy <- matrixStats::rowCounts(nay)
-  
+
   # good obs
   goodx <- mix<(py - 3) # need at least 3 obs per row to compute stats ...
   goody <- miy<(py - 3)
-  
+
   # missing obs in percentage
-  mix <- mix/py*100 
+  mix <- mix/py*100
   miy <- miy/py*100
-  
+
   if("missing_x" %in% stats){
     res[,"missing_x"] <- mix
     res[,"missing_y"] <- miy
@@ -435,15 +435,15 @@ compare_raster_space <- function(x,y,lc,
   if(any(nax))
     y[nax] <- NA
 
-  
+
   # remove rows with only NA
   good <- goodx & goody
   x <- x[good,]
   y <- y[good,]
   ny <- sum(good)
-  
+
   n <- py - matrixStats::rowCounts(y,value = NA) # n complete cases
-  
+
   mx <- .rowMeans(x,ny,py,na.rm = TRUE) # mean x
   my <- .rowMeans(y,ny,py,na.rm = TRUE) # mean x
 
