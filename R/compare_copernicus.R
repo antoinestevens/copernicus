@@ -1,3 +1,7 @@
+# get non-exported function (copied from the raster package)
+.recvOneData <- eval(parse(text="parallel:::recvOneData"))
+.sendCall <- eval( parse( text="parallel:::sendCall") )
+
 #' @title Compare Temporal Consistency of two Rasters
 #' @description Analysis of the temporal consistency (agreement) of two \code{\link[raster]{Raster-class}} objects with dimensions
 #' x (lon), y (lat), z (time). The analysis is performed pixel by pixel. The temporal profile (z dimension) of each
@@ -169,14 +173,12 @@ compare_raster_time <- function(x,y,
   } else {
     z <- NULL
   }
-
   b <- list()
   b[[1]] <- brick(x,nl=nl, values=FALSE)
-  if(length(getZ(x)))
-    b[[1]] <- setZ(b[[1]],getZ(x))
+  # if(length(getZ(x)))
+  #   b[[1]] <- setZ(b[[1]],getZ(x))
   names(b[[1]]) <-  fn
   b[[1]] <- writeStart(b[[1]], filename = filename,...)
-  
   if (is.null(cl)){
     tr <- blockSize(x,n = nlayers(x)*2)
     for ( i in seq_along(tr$row))
@@ -185,24 +187,24 @@ compare_raster_time <- function(x,y,
 
     cores <- length(cl)
     # send expr and data to cluster nodes
-    snow::clusterEvalQ(cl,library(matrixStats))
-    snow::clusterExport(cl,".compare_xy")
+    parallel::clusterEvalQ(cl,library(matrixStats))
+    parallel::clusterExport(cl,".compare_xy")
 
     # number of blocks
     tr <- blockSize(x, minblocks=cores)
 
     for (i in 1:cores)
-      snow::sendCall(cl[[i]],.compare_time,list(i = i, x = x, y = y, z = z, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=i)
+      .sendCall(cl[[i]],.compare_time,list(i = i, x = x, y = y, z = z, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=i)
 
     for (i in 1:tr$n) {
-      d <- snow::recvOneData(cl);
+      d <- .recvOneData(cl);
       if (!d$value$success)
         stop("Cluster error in Row: ", tr$row[d$value$tag],"\n")
 
       b[[1]] <- writeValues(b[[1]], d$value$value, tr$row[d$value$tag])
       ni <- cores + i
       if (ni <= tr$n)
-        snow::sendCall(cl[[d$node]],.compare_time,list(i = ni, x = x, y = y, z = z, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=ni)
+        .sendCall(cl[[d$node]],.compare_time,list(i = ni, x = x, y = y, z = z, row = tr$row, nrows = tr$nrow, stats = stats, f = f),tag=ni)
     }
   }
 
@@ -382,45 +384,66 @@ compare_raster_space <- function(x,y,lc,
   py <- ncol(y);ny <- nrow(y) # dims
   res <- matrix(nrow = ny, ncol = length(stats))
   colnames(res) <- stats
-
+  
+  nax <- is.na(x)
+  nay <- is.na(y)
+  
+  mix <- matrixStats::rowCounts(nax)# much faster
+  miy <- matrixStats::rowCounts(nay)
+  
+  # good obs
+  goodx <- mix<(py - 3) # need at least 3 obs per row to compute stats ...
+  goody <- miy<(py - 3)
+  
+  # missing obs in percentage
+  mix <- mix/py*100 
+  miy <- miy/py*100
+  
   if("missing_x" %in% stats){
-    mix <- matrixStats::rowCounts(x,value = NA)/py*100 # much faster
-    miy <- matrixStats::rowCounts(y,value = NA)/py*100
     res[,"missing_x"] <- mix
     res[,"missing_y"] <- miy
   }
 
   if("smoothness_x" %in% stats){
-    difx <- matrixStats::rowDiffs(x) # derivative
+    difx <- matrixStats::rowDiffs(x[goodx,]) # derivative
     difx <- rowMeans(abs(difx),na.rm=T)
     # difx <- rowMeans(abs(t(t(difx)/as.numeric(diff(z)))),na.rm=T) # this is the correct derivative
-    dify <- matrixStats::rowDiffs(y) # derivative
+    dify <- matrixStats::rowDiffs(y[goody,]) # derivative
     dify <- rowMeans(abs(dify),na.rm=T)
-    res[,"smoothness_x"] <- difx
-    res[,"smoothness_y"] <- dify
+    res[goodx,"smoothness_x"] <- difx
+    res[goody,"smoothness_y"] <- dify
   }
 
   if(any(stats %in% c("atime_x","btime_x"))){
     ## add 1 for a model with an intercept
     z <- cbind(1, (z - min(z))/365.25) # to get yearly coeff
-    abx <-  t(apply(x,1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
-    aby <-  t(apply(y,1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
+    abx <-  t(apply(x[goodx,],1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
+    aby <-  t(apply(y[goody,],1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
     if("atime_x" %in% stats){
-      res[,"atime_x"] <- abx[,1]
-      res[,"atime_y"] <- aby[,1]
+      res[goodx,"atime_x"] <- abx[,1]
+      res[goody,"atime_y"] <- aby[,1]
     }
     if("btime_x" %in% stats){
-      res[,"btime_x"] <- abx[,2]
-      res[,"btime_y"] <- aby[,2]
+      res[goodx,"btime_x"] <- abx[,2]
+      res[goody,"btime_y"] <- aby[,2]
     }
   }
 
-  # keep only complete cases
-  x[is.na(y)] <- NA
-  y[is.na(x)] <- NA
+  # now keep only complete cases
+  if(any(nay))
+    x[nay] <- NA
+  if(any(nax))
+    y[nax] <- NA
 
+  
+  # remove rows with only NA
+  good <- goodx & goody
+  x <- x[good,]
+  y <- y[good,]
+  ny <- sum(good)
+  
   n <- py - matrixStats::rowCounts(y,value = NA) # n complete cases
-
+  
   mx <- .rowMeans(x,ny,py,na.rm = TRUE) # mean x
   my <- .rowMeans(y,ny,py,na.rm = TRUE) # mean x
 
@@ -435,16 +458,16 @@ compare_raster_space <- function(x,y,lc,
     covxy <- .rowSums(xmx*ymy,ny,py,na.rm=T)/(n-1) # covariance
     r <- covxy/(sdx*sdy) # correlation
     if("cor" %in% stats)
-      res[,"cor"] <- r
+      res[good,"cor"] <- r
 
     if(any(stats %in% c("ax","bx","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
       bx <- sdx/sdy * sign(r)  # coefficient of the GMFR x = a + by
       ax <- mx - (bx*my)  # intercept of the GMFR x = a + by
       xhat <- ax + (bx*y)
       if("ax" %in% stats)
-        res[,"ax"] <- ax
+        res[good,"ax"] <- ax
       if("bx" %in% stats)
-        res[,"bx"] <- bx
+        res[good,"bx"] <- bx
     }
 
     if(any(stats %in% c("ay","by","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
@@ -452,16 +475,16 @@ compare_raster_space <- function(x,y,lc,
       ay <- my - (by*mx) # intercept of the GMFR y = a + bx
       yhat <- ay + (by*x)
       if("ay" %in% stats)
-        res[,"ay"] <- ay
+        res[good,"ay"] <- ay
       if("by" %in% stats)
-        res[,"by"] <- by
+        res[good,"by"] <- by
     }
   }
 
   if(any(stats %in% c("mbe","ac","acs","acu"))){
     mbe <- (mx-my) # mbe
     if("mbe" %in% stats)
-      res[,"mbe"] <- mbe
+      res[good,"mbe"] <- mbe
   }
 
   if(any(stats %in% c("rmsd","rmspd","ac","acs","acu","mbe","rmpds","mpdpu","mpdps"))){
@@ -473,7 +496,7 @@ compare_raster_space <- function(x,y,lc,
       spod <- .rowSums((mbe + abs(x - mx))*(mbe + abs(y - my)),ny,py,na.rm=T) # sum of potential differences
       if("ac" %in% stats){
         ac <- 1 - (ssd/spod) # agreement coefficient
-        res[,"ac"] <- ac
+        res[good,"ac"] <- ac
       }
     }
 
@@ -482,10 +505,10 @@ compare_raster_space <- function(x,y,lc,
       if(any(stats %in% c("rmsd","rmspd"))){
         rmsd <- msd^.5
         if("rmsd" %in% stats)
-          res[,"rmsd"] <- rmsd
+          res[good,"rmsd"] <- rmsd
         if("rmspd" %in% stats){
           rmspd <- rmsd/my
-          res[,"rmspd"] <- rmspd
+          res[good,"rmspd"] <- rmspd
         }
       }
     }
@@ -499,17 +522,17 @@ compare_raster_space <- function(x,y,lc,
       mpdu <- spdu/n
       if("rmpdu" %in% stats){
         rmpdu <- (mpdu)^.5
-        res[,"rmpdu"] <- rmpdu
+        res[good,"rmpdu"] <- rmpdu
       }
       if("mpdpu" %in% stats){
         mpdpu <- mpdu/msd
-        res[,"mpdpu"] <- mpdpu
+        res[good,"mpdpu"] <- mpdpu
       }
     }
 
     if("acu" %in% stats){
       acu <- 1 - (spdu/spod)
-      res[,"acu"] <- acu
+      res[good,"acu"] <- acu
     }
 
     if(any(stats %in% c("acs","rmpds","mpdps"))){
@@ -518,21 +541,20 @@ compare_raster_space <- function(x,y,lc,
         mpds <- spds/n
         if("rmpds" %in% stats){
           rmpds <- (mpds)^.5
-          res[,"rmpds"] <- rmpds
+          res[good,"rmpds"] <- rmpds
         }
         if("mpdps" %in% stats){
           mpdps <- mpds/msd
-          res[,"mpdps"] <- mpdps
+          res[good,"mpdps"] <- mpdps
         }
 
       }
       if("acs" %in% stats){
         acs <- 1 - (spds/spod)
-        res[,"acs"] <- acs
+        res[good,"acs"] <- acs
       }
     }
   }
-  res[is.nan(res)] <- NA
   res[,stats,drop=FALSE]
 }
 
