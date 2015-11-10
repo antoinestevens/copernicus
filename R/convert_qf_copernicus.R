@@ -75,11 +75,11 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
       # number of blocks
       tr <- blockSize(r, minblocks=cores)
       for (i in 1:cores)
-        snow::sendCall(cl[[i]],.convert_qf_cop,list(i = i, r = r, row = tr$row, nrows = tr$nrow,qf = q),tag=i)
+        .sendCall(cl[[i]],.convert_qf_cop,list(i = i, r = r, row = tr$row, nrows = tr$nrow,qf = q),tag=i)
 
       for (i in 1:tr$n)
       {
-        d <- snow::recvOneData(cl);
+        d <- .recvOneData(cl);
         if (!d$value$success)
           stop("Cluster error in Row: ", tr$row[d$value$tag],"\n")
 
@@ -87,7 +87,7 @@ convert_qf_copernicus <- function(r, qf, cl = NULL, filename=rasterTmpFile(),...
 
         ni <- cores + i
         if (ni <= tr$n)
-          snow::sendCall(cl[[d$node]],.convert_qf_cop,list(i = ni, r = r, row = tr$row, nrows = tr$nrow,qf = q),tag=ni)
+          .sendCall(cl[[d$node]],.convert_qf_cop,list(i = ni, r = r, row = tr$row, nrows = tr$nrow,qf = q),tag=ni)
       }
     }
 
