@@ -373,6 +373,16 @@ compare_raster_space <- function(x,y,lc,
   res
 }
 
+
+#' Internal function to compare two matrix
+#' @param x input x
+#' @param y input y
+#' @param z time for regression
+#' @param stats See \code{compare_raster_time}
+#' @param byrow Logical. Should the comparisons processed by row?
+#' @keywords internal
+#'
+#' @export
 .compare_xy <- function(x,y,z,stats,byrow = TRUE){
   # See Ji and Gallo (2006) An Agreement Coefficient for Image Comparison
   # pg 826 ex:
@@ -438,8 +448,8 @@ compare_raster_space <- function(x,y,lc,
 
   # remove rows with only NA
   good <- goodx & goody
-  x <- x[good,]
-  y <- y[good,]
+  x <- x[good,,drop=F]
+  y <- y[good,,drop=F]
   ny <- sum(good)
 
   n <- py - matrixStats::rowCounts(y,value = NA) # n complete cases
