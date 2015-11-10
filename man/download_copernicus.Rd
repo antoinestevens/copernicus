@@ -4,7 +4,8 @@
 \alias{download_copernicus}
 \title{Download COPERNICUS products}
 \usage{
-download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password,allowParallel = FALSE,...)
+download_copernicus(product,begin,end,extent,tileH,tileV,
+                    outPath,user,password,allowParallel = FALSE,...)
 }
 \arguments{
 \item{product}{One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),

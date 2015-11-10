@@ -2,7 +2,8 @@
 #' @description
 #' Download COPERNICUS products, for a given period of time and tile(s)
 #' @usage
-#' download_copernicus(product,begin,end,extent,tileH,tileV,outPath,user,password,allowParallel = FALSE,...)
+#' download_copernicus(product,begin,end,extent,tileH,tileV,
+#'                     outPath,user,password,allowParallel = FALSE,...)
 #' @param product One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 #' 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 #' 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)
