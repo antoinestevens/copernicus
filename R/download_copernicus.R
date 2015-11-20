@@ -89,10 +89,6 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     # get file url's
     urls <- get_url_copernicus(product, ch_time$begin, ch_time$end, tileH = tiles$h, tileV = tiles$v, ...)
 
-    # Set password and user name
-    h <- curl::new_handle()
-    curl::handle_setopt(h, username = user, password = password)
-
     # create dir if necessary
     outPath <- normalizePath(outPath)
     if (!dir.exists(outPath))
@@ -114,6 +110,9 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     if (length(u)) {
         foreach(i = 1:length(u))%mydo%{
             print(paste("Downloading:", d[id][i]))
+            # Set password and user name
+            h <- curl::new_handle()
+            curl::handle_setopt(h, username = user, password = password)
             # download data
             curl::curl_download(url = u[i], dest = paste0(outPath, "/", d[id][i]), handle = h)
         }
