@@ -41,7 +41,6 @@
 #'    \item{\code{smoothness}}{ Mean absolute value of the first derivative over time}
 #'    \item{\code{atime}}{ Intercept of the regression over time}
 #'    \item{\code{btime}}{ Coefficient of the regression over time}
-
 #' }
 #' @return A \code{\link[raster]{Raster-class}} object with layers correponding to \code{stats}. If \code{FUN} argument
 #' is provided, layers correponds to the groups resulting from applying \code{FUN} to the \code{z} slot of input rasters \code{x}
@@ -506,6 +505,7 @@ compare_raster_space <- function(x,y,lc,
       spod <- .rowSums((mbe + abs(x - mx))*(mbe + abs(y - my)),ny,py,na.rm=T) # sum of potential differences
       if("ac" %in% stats){
         ac <- 1 - (ssd/spod) # agreement coefficient
+        ac <- pmax(ac,-1) # restrict to [-1;1]
         res[good,"ac"] <- ac
       }
     }
@@ -542,6 +542,7 @@ compare_raster_space <- function(x,y,lc,
 
     if("acu" %in% stats){
       acu <- 1 - (spdu/spod)
+      acu <- pmax(acu,-1) # restrict to [-1;1]
       res[good,"acu"] <- acu
     }
 
@@ -561,6 +562,7 @@ compare_raster_space <- function(x,y,lc,
       }
       if("acs" %in% stats){
         acs <- 1 - (spds/spod)
+        acs <- pmax(acs,-1) # restrict to [-1;1]
         res[good,"acs"] <- acs
       }
     }
