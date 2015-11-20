@@ -4,22 +4,25 @@ Title: Download and Extract COPERNICUS Global Land Vegetation Products
 Version: 0.3.0
 Author: Antoine Stevens
 Maintainer: Antoine Stevens <antoinexstevens@gmail.com>
-Description: Provides access to the COPERNICUS Global Land Service (http://land.copernicus.eu/global/).
-    Currently, only Vegetation products are available : Normalized Difference Vegetation Index (V1: VGT instrument),
-    Normalized Difference Vegetation Index (V2: PROBAV instrument), Leaf Area Index ,Fraction of Vegetation Green Cover,
-    Fraction of Absorbed Photosynthetically Active Radiation, Vegetation Condition Index, Vegetation Productivity Index,
-    Dry Matter Productivity, and Burnt Areas.
-    The package provides functions to (i) download h5 files based on location (COPERNICUS tiling system),
-    (ii) convert (to tif), subset and project the downloaded files and (iii) compare the spatial and temporal agreement of
-    two RasterBrick or RasterStack objects using the statistics described in
-    Ji and Gallo (2006) Photogrammetric Engineering & Remote Sensing 72, 823-833
-    The user should register on the data portal to access data.
-    Pieces of code are taken/inspired from the MODIS package (v0.10-31): https://r-forge.r-project.org/R/?group_id=1252),
-    Function arguments follow the same naming as in MODIS, as much as possible.
+Description: Provides access to the COPERNICUS Global Land Service (http://
+    land.copernicus.eu/global/). Currently, only Vegetation products are available :
+    Normalized Difference Vegetation Index (V1: VGT instrument), Normalized
+    Difference Vegetation Index (V2: PROBAV instrument), Leaf Area Index ,Fraction
+    of Vegetation Green Cover, Fraction of Absorbed Photosynthetically Active
+    Radiation, Vegetation Condition Index, Vegetation Productivity Index, Dry
+    Matter Productivity, and Burnt Areas. The package provides functions to (i)
+    download h5 files based on location (COPERNICUS tiling system), (ii) convert
+    (to tif), subset and project the downloaded files and (iii) compare the spatial
+    and temporal agreement of two RasterBrick or RasterStack objects using the
+    statistics described in Ji and Gallo (2006) Photogrammetric Engineering & Remote
+    Sensing 72, 823-833 The user should register on the data portal to access data.
+    Pieces of code are taken/inspired from the MODIS package (v0.10-31): https://r-
+    forge.r-project.org/R/?group_id=1252), Function arguments follow the same naming
+    as in MODIS, as much as possible.
 License: GPL-3
 LazyData: TRUE
 Depends:
-   R (>= 3.0.1)
+    R (>= 3.0.1)
 Imports:
     curl,
     foreach,
@@ -38,3 +41,4 @@ Imports:
     sp,
     settings,
     stringr
+RoxygenNote: 5.0.1
