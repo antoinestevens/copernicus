@@ -5,17 +5,15 @@
 \alias{copernicus}
 \alias{copernicus-package}
 \title{Access and extract COPERNICUS imagery}
-\note{
-Pieces of code are taken/inspired from the MODIS package (v0.10-31): https://r-forge.r-project.org/R/?group_id=1252),
-Function arguments follow the same naming as in MODIS, as much as possible.
-}
-\section{Introduction}{
-
+\description{
 The copernicus package allows to download data from the COPERNICUS data portal
 through the fast HTTP access (the so called 'data pool': http://land.copernicus.vgt.vito.be/PDF/datapool/).
 The user should be registered to access data.
 }
-
+\note{
+Pieces of code are taken/inspired from the MODIS package (v0.10-31): https://r-forge.r-project.org/R/?group_id=1252),
+Function arguments follow the same naming as in MODIS, as much as possible.
+}
 \section{Download}{
 
 \code{download_copernicus} wil download zip files on the data portal based on an extent or given tiles (h,v) pairs and a product name.
