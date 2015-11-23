@@ -125,7 +125,7 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
             Sys.sleep(1) # sleep for 1 sec before re-try
         }
         if(class(f)=="try-error"){
-          unlink(f)
+          unlink(d)
           NULL
         } else {
           f
