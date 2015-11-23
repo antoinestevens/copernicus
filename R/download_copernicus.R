@@ -44,7 +44,7 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
 
     if(!is.logical(allowParallel))
       stop("allowParallel should be a logical")
-  
+
     if(!(is.numeric(ntry)&length(ntry)==1&ntry > 0))
       stop("ntry should be a numercic of length 1 and > 0")
 
@@ -98,25 +98,23 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     if (!dir.exists(outPath))
         dir.create(outPath, showWarnings = FALSE, recursive = TRUE)
     a <- list.files(outPath)  # files that are already in the output directory
-    
+
     print(paste0(length(unlist(urls)), " files to download"))
-    
-    restorepoint::restore.point("dff")
-    
+
     # if urls is a list, we need to iterate over the elements of the list, then over the elements in each elements of the list
-    f <- foreach(ul = iter(urls))%:%foreach(u = iter(ul),.combine = c)%do%{
+    f <- foreach(ul = iter(urls))%:%foreach(u = iter(ul),.combine = c)%mydo%{
       # Set password and user name
       h <- curl::new_handle()
       curl::handle_setopt(h, username = user, password = password)
-      
+
       # destination file
       d <- basename(u)
-      
-      if(! d %in% a){      
-      
+
+      if(! d %in% a){
+
         print(paste("Downloading:", d))
         d <- paste0(outPath, "/", d)
-        
+
         # download data
         for(ii in 1:ntry){
           # try at least ntry times
@@ -130,13 +128,13 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
           unlink(f)
           NULL
         } else {
-          f        
+          f
         }
       } else {
         paste0(outPath, "/", d)
       }
     }
-    
+
     if(is.list(urls)){
       f <- f[!sapply(f, is.null)]
       return(invisible(f))
