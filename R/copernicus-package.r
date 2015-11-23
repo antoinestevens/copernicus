@@ -1,6 +1,5 @@
 #' @title  Access and extract COPERNICUS imagery
-#'
-#' @section Introduction:
+#' @description
 #' The copernicus package allows to download data from the COPERNICUS data portal
 #' through the fast HTTP access (the so called 'data pool': http://land.copernicus.vgt.vito.be/PDF/datapool/).
 #' The user should be registered to access data.
