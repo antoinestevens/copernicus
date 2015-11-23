@@ -25,9 +25,11 @@ See \code{\link{get_tile_copernicus}} for details.}
 
 \item{outPath}{Path where downloaded files should be stored. Default set via \code{copernicus_options('downloadPath')}}
 
-\item{user}{user name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}}
+\item{user}{User name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}}
 
-\item{password}{password associated with user name to access COPERNICUS data portal. Default set via \code{copernicus_options('password')}}
+\item{password}{Password associated with user name to access COPERNICUS data portal. Default set via \code{copernicus_options('password')}}
+
+\item{ntry}{Number of tries after non-succes download response from the server. Increasing the value increases chances to actually get the data. Default set via \code{copernicus_options('ntry')}}
 
 \item{allowParallel}{Logical. If a \code{foreach} parallel backend is loaded and available, should the function use it? Default is \code{FALSE}.}
 

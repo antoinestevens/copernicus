@@ -2,12 +2,15 @@
 % Please edit documentation in R/copernicus_options.R
 \name{copernicus_options}
 \alias{copernicus_options}
-\title{Set or get options for the COPERNICUS package}
+\title{Set or get options for the \code{copernicus} package}
 \usage{
 copernicus_options(...)
 }
 \arguments{
 \item{...}{Option names to retrieve option values or \code{[key]=[value]} pairs to set options.}
+}
+\description{
+Set or get parameters used in \code{\link{download_copernicus}} and \code{\link{extract_copernicus}}
 }
 \note{
 \code{resamplingType} is not working yet. Use function argument instead.
@@ -23,8 +26,9 @@ The following options are supported
    \item{\code{resamplingType}} {Default resampling method. Default is 'near'. See \code{\link[gdalUtils]{gdalwarp}} for other options}
    \item{\code{gdalPath}} {Default is 'C:/OSGeo4W64/bin/' (this is when the OSGEO suite has been installed)}
    \item{\code{server}} {Default is 'http://land.copernicus.vgt.vito.be/PDF///datapool/Vegetation/'}
-   \item{\code{user}} {user name to access COPERNICUS data portal}
-   \item{\code{password}} {password associate with user name to access COPERNICUS data portal}
+   \item{\code{user}} {User name to access \href{http://www.copernicus.eu/main/data-access}{COPERNICUS data portal}. Parameter of \code{\link{download_copernicus}}}
+   \item{\code{password}} {Password associate with user name to access COPERNICUS data portal. Parameter of \code{\link{download_copernicus}}}
+   \item{\code{ntry}} {Number of tries after non-succes download response from the server (default = 5). Increasing the value increases chances to actually get the data. Parameter of \code{\link{download_copernicus}}}
 }
 }
 \examples{

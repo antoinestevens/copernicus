@@ -14,8 +14,9 @@
 #' @param tileH H index of the tile COPERNICUS system (\code{numeric} or \code{character})
 #' @param tileV V index of the tile COPERNICUS system (\code{numeric} or \code{character})
 #' @param outPath Path where downloaded files should be stored. Default set via \code{copernicus_options('downloadPath')}
-#' @param user user name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}
-#' @param password password associated with user name to access COPERNICUS data portal. Default set via \code{copernicus_options('password')}
+#' @param user User name to access COPERNICUS data portal. Default set via \code{copernicus_options('user')}
+#' @param password Password associated with user name to access COPERNICUS data portal. Default set via \code{copernicus_options('password')}
+#' @param ntry Number of tries after non-succes download response from the server. Increasing the value increases chances to actually get the data. Default set via \code{copernicus_options('ntry')}
 #' @param allowParallel Logical. If a \code{foreach} parallel backend is loaded and available, should the function use it? Default is \code{FALSE}.
 #' @param ... argument passed to \code{\link{get_url_copernicus}}, such as groupByDate
 #' @details If target files are already present in the \code{outPath} directory, they are not downloaded.
@@ -39,10 +40,13 @@
 #' @export
 download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR", "VCI",
     "VPI", "DMP", "BA"), begin, end, extent, tileH, tileV, outPath = copernicus_options("downloadPath"),
-    user = copernicus_options("user"), password = copernicus_options("password"), allowParallel = FALSE, ...) {
+    user = copernicus_options("user"), password = copernicus_options("password"), ntry = copernicus_options("ntry"), allowParallel = FALSE, ...) {
 
     if(!is.logical(allowParallel))
       stop("allowParallel should be a logical")
+  
+    if(!(is.numeric(ntry)&length(ntry)==1&ntry > 0))
+      stop("ntry should be a numercic of length 1 and > 0")
 
     if(allowParallel){
       `%mydo%` <- foreach::`%dopar%`
@@ -93,33 +97,50 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     outPath <- normalizePath(outPath)
     if (!dir.exists(outPath))
         dir.create(outPath, showWarnings = FALSE, recursive = TRUE)
-    if(is.list(urls))
-      destfiles <- lapply(urls, basename)
-    else
-      destfiles <- basename(urls)
-
-    u <- unlist(urls)
-    d <- unlist(destfiles)
-
-    id <- !d %in% list.files(outPath)  # download only those that are not in the output directory
-
-    print(paste0(sum(id), " files will be downloaded!"))
-
-    u <- u[id]
-
-    if (length(u)) {
-        foreach(i = 1:length(u))%mydo%{
-            print(paste("Downloading:", d[id][i]))
-            # Set password and user name
-            h <- curl::new_handle()
-            curl::handle_setopt(h, username = user, password = password)
-            # download data
-            curl::curl_download(url = u[i], dest = paste0(outPath, "/", d[id][i]), handle = h)
+    a <- list.files(outPath)  # files that are already in the output directory
+    
+    print(paste0(length(unlist(urls)), " files to download"))
+    
+    restorepoint::restore.point("dff")
+    
+    # if urls is a list, we need to iterate over the elements of the list, then over the elements in each elements of the list
+    f <- foreach(ul = iter(urls))%:%foreach(u = iter(ul),.combine = c)%do%{
+      # Set password and user name
+      h <- curl::new_handle()
+      curl::handle_setopt(h, username = user, password = password)
+      
+      # destination file
+      d <- basename(u)
+      
+      if(! d %in% a){      
+      
+        print(paste("Downloading:", d))
+        d <- paste0(outPath, "/", d)
+        
+        # download data
+        for(ii in 1:ntry){
+          # try at least ntry times
+          f <- try(curl::curl_download(url = u,dest = d,handle = h))
+          if(class(f)!="try-error")
+            break
+          else
+            Sys.sleep(1) # sleep for 1 sec before re-try
         }
+        if(class(f)=="try-error"){
+          unlink(f)
+          NULL
+        } else {
+          f        
+        }
+      } else {
+        paste0(outPath, "/", d)
+      }
     }
-
-    if(is.list(urls))
-      return(invisible(lapply(destfiles,function(x)paste0(outPath,"/",x))))
-    else
-      return(invisible(paste0(outPath,"/",destfiles)))
+    
+    if(is.list(urls)){
+      f <- f[!sapply(f, is.null)]
+      return(invisible(f))
+    } else {
+      return(invisible(unlist(f)))
+    }
 }
