@@ -215,12 +215,14 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 # will expect them as pixel (outer) corners, so you may have to extend the coordinates with
                 # 1/2 pixel size in all directions. '
                 e_tile <- e_tile + (1/112)  # same as:  e_tile <- extend(e_tile,(1/112)/2)
-
                 # project geographical coordinates in the plate carree system (no datum transformation)
                 # the +over argument allows longitude output outside -180 to 180 range (disables wrapping)
                 # (because one can have potentially -180 - (1/112)/2 )
                 # https://trac.osgeo.org/proj/wiki/GenParm
-                e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over")
+                # e_tile_proj <- rgdal::project(as.matrix(e_tile), "+init=epsg:32662 +over") # does not work consistently
+                e_tile_proj <- raster(e_tile)
+                projection(e_tile_proj) <- "+init=epsg:4326"
+                e_tile_proj <- as.matrix(extent(projectExtent(e_tile_proj,"+init=epsg:32662 +over")))
 
                 if (!is.null(extent)) {
 
@@ -248,7 +250,10 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                     e <- extent(crop(tile,e))
 
                     # project the subwindow
-                    e_proj <- rgdal::project(as.matrix(e), "+init=epsg:32662 +over")
+                    # e_proj <- rgdal::project(as.matrix(e), "+init=epsg:32662 +over") # does not work consistently
+                    e_proj <- raster(e)
+                    projection(e_proj) <- "+init=epsg:4326"
+                    e_proj <- as.matrix(extent(projectExtent(e_proj,"+init=epsg:32662 +over")))
 
                     # compute crop subwindow
                     # translate extent to the coord system of the tile (upper-left --> pixel centre)
