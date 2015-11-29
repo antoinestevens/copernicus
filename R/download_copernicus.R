@@ -100,9 +100,8 @@ download_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER
     a <- list.files(outPath)  # files that are already in the output directory
 
     print(paste0(length(unlist(urls)), " files to download"))
-
     # if urls is a list, we need to iterate over the elements of the list, then over the elements in each elements of the list
-    f <- foreach(ul = iter(urls))%:%foreach(u = iter(ul),.combine = c)%mydo%{
+    f <- foreach(ul = iterators::iter(urls))%:%foreach(u = iterators::iter(ul),.combine = c)%mydo%{
       # Set password and user name
       h <- curl::new_handle()
       curl::handle_setopt(h, username = user, password = password)
