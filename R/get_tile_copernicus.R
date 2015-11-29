@@ -71,9 +71,9 @@ get_tile_copernicus <- function(extent, tileH, tileV, ...) {
         if (is.na(proj4string(extent)))
             proj4string(extent) <- proj4string(tiles)
 
-        result <- tiles@data[rgeos::gIntersects(extent, tiles, byid = TRUE),]
+        id <- gRelate(extent, tiles, byid = TRUE,pattern = "T**T*****") # this is equivalent to gIntersects but ignoring boundaries
+        result <- tiles@data[id,]
     } else {
-
         if (missing(tileV))
             stop("Provide a numeric or character vector for 'tileV'")
 
