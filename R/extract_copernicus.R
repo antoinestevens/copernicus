@@ -183,13 +183,12 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
             src_dataset <- foreach(f = iterators::iter(fgroup),.combine = c)%do%{
 
                 finfo <- scan_file_copernicus(f)
-
                 if (zip) {
                     folder <- finfo[, "date"]
                     f_h5 <- extension(f, ".h5")
                     if(i==1)
-                    unzip(f, files = paste0(folder, "/", basename(f_h5)), exdir = sub("/$", "", outPath),
-                        junkpaths = T)
+                    unzip(f, files = paste0(folder, "/", basename(f_h5)), 
+                          exdir = sub("/$|\\\\$", "", outPath),junkpaths = T)
                 } else {
                     f_h5 <- f
                 }
