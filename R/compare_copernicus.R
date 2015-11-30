@@ -314,7 +314,7 @@ compare_raster_space <- function(x,y,lc,
                                  stats= c("missing", "cor", "ax", "ay", "bx", "by", "ac", "acu", "acs", "mbe" ,
                                           "rmsd", "rmspd", "rmpdu", "rmpds","mpdpu","mpdps")){
   stats <- match.arg(stats,several.ok = TRUE)
-
+  
   # change stats
   if("missing"%in%stats){
     stats <- stats[!stats%in%"missing"]
@@ -429,12 +429,16 @@ compare_raster_space <- function(x,y,lc,
     abx <-  t(apply(x[goodx,],1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
     aby <-  t(apply(y[goody,],1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
     if("atime_x" %in% stats){
-      res[goodx,"atime_x"] <- abx[,1]
-      res[goody,"atime_y"] <- aby[,1]
+      if(length(abx))
+        res[goodx,"atime_x"] <- abx[,1]
+      if(length(aby))
+        res[goody,"atime_y"] <- aby[,1]
     }
     if("btime_x" %in% stats){
-      res[goodx,"btime_x"] <- abx[,2]
-      res[goody,"btime_y"] <- aby[,2]
+      if(length(abx))
+        res[goodx,"btime_x"] <- abx[,2]
+      if(length(aby))
+        res[goody,"btime_y"] <- aby[,2]
     }
   }
 
@@ -450,120 +454,124 @@ compare_raster_space <- function(x,y,lc,
   x <- x[good,,drop=F]
   y <- y[good,,drop=F]
   ny <- sum(good)
-
-  n <- py - matrixStats::rowCounts(y,value = NA) # n complete cases
-
-  mx <- .rowMeans(x,ny,py,na.rm = TRUE) # mean x
-  my <- .rowMeans(y,ny,py,na.rm = TRUE) # mean x
-
-  xmx <- x - mx # deviation to the mean x
-  ymy <- y - my # deviation to the mean y
-
-  sdx <- (.rowSums(xmx^2,ny,py,na.rm=T)/(n-1))^.5 # standard deviation x
-  sdy <- (.rowSums(ymy^2,ny,py,na.rm=T)/(n-1))^.5 # standard deviation y
-
-  if(any(stats %in% c("cor","ax","bx","by","ay","acu","acs","rmpds","rmpdu","mpdpu","mpdps"))){
-
-    covxy <- .rowSums(xmx*ymy,ny,py,na.rm=T)/(n-1) # covariance
-    r <- covxy/(sdx*sdy) # correlation
-    if("cor" %in% stats)
-      res[good,"cor"] <- r
-
-    if(any(stats %in% c("ax","bx","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
-      bx <- sdx/sdy * sign(r)  # coefficient of the GMFR x = a + by
-      ax <- mx - (bx*my)  # intercept of the GMFR x = a + by
-      xhat <- ax + (bx*y)
-      if("ax" %in% stats)
-        res[good,"ax"] <- ax
-      if("bx" %in% stats)
-        res[good,"bx"] <- bx
-    }
-
-    if(any(stats %in% c("ay","by","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
-      by <- sdy/sdx * sign(r) # coefficient of the GMFR y = a + bx
-      ay <- my - (by*mx) # intercept of the GMFR y = a + bx
-      yhat <- ay + (by*x)
-      if("ay" %in% stats)
-        res[good,"ay"] <- ay
-      if("by" %in% stats)
-        res[good,"by"] <- by
-    }
-  }
-
-  if(any(stats %in% c("mbe","ac","acs","acu"))){
-    mbe <- (mx-my) # mbe
-    if("mbe" %in% stats)
-      res[good,"mbe"] <- mbe
-  }
-
-  if(any(stats %in% c("rmsd","rmspd","ac","acs","acu","mbe","rmpds","mpdpu","mpdps"))){
-
-    ssd <- .rowSums((x-y)^2,ny,py,na.rm=T) # sum of squared differences
-
-    if(any(stats %in% c("ac","acs","acu"))){
-      mbe <- abs(mbe)
-      spod <- .rowSums((mbe + abs(x - mx))*(mbe + abs(y - my)),ny,py,na.rm=T) # sum of potential differences
-      if("ac" %in% stats){
-        ac <- 1 - (ssd/spod) # agreement coefficient
-        ac <- pmax(ac,-1) # restrict to [-1;1]
-        res[good,"ac"] <- ac
+  
+  # if there is at least one complete case ...
+  if(ny){
+    
+    n <- py - matrixStats::rowCounts(y,value = NA) # n complete cases
+  
+    mx <- .rowMeans(x,ny,py,na.rm = TRUE) # mean x
+    my <- .rowMeans(y,ny,py,na.rm = TRUE) # mean x
+  
+    xmx <- x - mx # deviation to the mean x
+    ymy <- y - my # deviation to the mean y
+  
+    sdx <- (.rowSums(xmx^2,ny,py,na.rm=T)/(n-1))^.5 # standard deviation x
+    sdy <- (.rowSums(ymy^2,ny,py,na.rm=T)/(n-1))^.5 # standard deviation y
+  
+    if(any(stats %in% c("cor","ax","bx","by","ay","acu","acs","rmpds","rmpdu","mpdpu","mpdps"))){
+  
+      covxy <- .rowSums(xmx*ymy,ny,py,na.rm=T)/(n-1) # covariance
+      r <- covxy/(sdx*sdy) # correlation
+      if("cor" %in% stats)
+        res[good,"cor"] <- r
+  
+      if(any(stats %in% c("ax","bx","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
+        bx <- sdx/sdy * sign(r)  # coefficient of the GMFR x = a + by
+        ax <- mx - (bx*my)  # intercept of the GMFR x = a + by
+        xhat <- ax + (bx*y)
+        if("ax" %in% stats)
+          res[good,"ax"] <- ax
+        if("bx" %in% stats)
+          res[good,"bx"] <- bx
+      }
+  
+      if(any(stats %in% c("ay","by","acu","acs","rmpds","rmpdu","mpdps","mpdpu"))){
+        by <- sdy/sdx * sign(r) # coefficient of the GMFR y = a + bx
+        ay <- my - (by*mx) # intercept of the GMFR y = a + bx
+        yhat <- ay + (by*x)
+        if("ay" %in% stats)
+          res[good,"ay"] <- ay
+        if("by" %in% stats)
+          res[good,"by"] <- by
       }
     }
-
-    if(any(stats %in% c("rmsd","rmspd","mpdpu","mpdps"))){
-      msd <- ssd / n # mean squared difference
-      if(any(stats %in% c("rmsd","rmspd"))){
-        rmsd <- msd^.5
-        if("rmsd" %in% stats)
-          res[good,"rmsd"] <- rmsd
-        if("rmspd" %in% stats){
-          rmspd <- rmsd/my
-          res[good,"rmspd"] <- rmspd
+  
+    if(any(stats %in% c("mbe","ac","acs","acu"))){
+      mbe <- (mx-my) # mbe
+      if("mbe" %in% stats)
+        res[good,"mbe"] <- mbe
+    }
+  
+    if(any(stats %in% c("rmsd","rmspd","ac","acs","acu","mbe","rmpds","mpdpu","mpdps"))){
+  
+      ssd <- .rowSums((x-y)^2,ny,py,na.rm=T) # sum of squared differences
+  
+      if(any(stats %in% c("ac","acs","acu"))){
+        mbe <- abs(mbe)
+        spod <- .rowSums((mbe + abs(x - mx))*(mbe + abs(y - my)),ny,py,na.rm=T) # sum of potential differences
+        if("ac" %in% stats){
+          ac <- 1 - (ssd/spod) # agreement coefficient
+          ac <- pmax(ac,-1) # restrict to [-1;1]
+          res[good,"ac"] <- ac
+        }
+      }
+  
+      if(any(stats %in% c("rmsd","rmspd","mpdpu","mpdps"))){
+        msd <- ssd / n # mean squared difference
+        if(any(stats %in% c("rmsd","rmspd"))){
+          rmsd <- msd^.5
+          if("rmsd" %in% stats)
+            res[good,"rmsd"] <- rmsd
+          if("rmspd" %in% stats){
+            rmspd <- rmsd/my
+            res[good,"rmspd"] <- rmspd
+          }
         }
       }
     }
-  }
-
-  if(any(stats %in% c("acu","acs","rmpdu","rmpds","mpdps","mpdpu"))){
-
-    spdu <- .rowSums(abs(x - xhat)*abs(y - yhat),ny,py,na.rm=T) # unsystematic sum of product-difference
-
-    if(any(stats %in% c("rmpdu","mpdpu","mpdpu"))){
-      mpdu <- spdu/n
-      if("rmpdu" %in% stats){
-        rmpdu <- (mpdu)^.5
-        res[good,"rmpdu"] <- rmpdu
-      }
-      if("mpdpu" %in% stats){
-        mpdpu <- mpdu/msd
-        res[good,"mpdpu"] <- mpdpu
-      }
-    }
-
-    if("acu" %in% stats){
-      acu <- 1 - (spdu/spod)
-      acu <- pmax(acu,-1) # restrict to [-1;1]
-      res[good,"acu"] <- acu
-    }
-
-    if(any(stats %in% c("acs","rmpds","mpdps"))){
-      spds <- ssd - spdu # systematic sum of product-difference
-      if (any(stats %in% c("rmpds","mpdps"))){
-        mpds <- spds/n
-        if("rmpds" %in% stats){
-          rmpds <- (mpds)^.5
-          res[good,"rmpds"] <- rmpds
+  
+    if(any(stats %in% c("acu","acs","rmpdu","rmpds","mpdps","mpdpu"))){
+  
+      spdu <- .rowSums(abs(x - xhat)*abs(y - yhat),ny,py,na.rm=T) # unsystematic sum of product-difference
+  
+      if(any(stats %in% c("rmpdu","mpdpu","mpdpu"))){
+        mpdu <- spdu/n
+        if("rmpdu" %in% stats){
+          rmpdu <- (mpdu)^.5
+          res[good,"rmpdu"] <- rmpdu
         }
-        if("mpdps" %in% stats){
-          mpdps <- mpds/msd
-          res[good,"mpdps"] <- mpdps
+        if("mpdpu" %in% stats){
+          mpdpu <- mpdu/msd
+          res[good,"mpdpu"] <- mpdpu
         }
-
       }
-      if("acs" %in% stats){
-        acs <- 1 - (spds/spod)
-        acs <- pmax(acs,-1) # restrict to [-1;1]
-        res[good,"acs"] <- acs
+  
+      if("acu" %in% stats){
+        acu <- 1 - (spdu/spod)
+        acu <- pmax(acu,-1) # restrict to [-1;1]
+        res[good,"acu"] <- acu
+      }
+  
+      if(any(stats %in% c("acs","rmpds","mpdps"))){
+        spds <- ssd - spdu # systematic sum of product-difference
+        if (any(stats %in% c("rmpds","mpdps"))){
+          mpds <- spds/n
+          if("rmpds" %in% stats){
+            rmpds <- (mpds)^.5
+            res[good,"rmpds"] <- rmpds
+          }
+          if("mpdps" %in% stats){
+            mpdps <- mpds/msd
+            res[good,"mpdps"] <- mpdps
+          }
+  
+        }
+        if("acs" %in% stats){
+          acs <- 1 - (spds/spod)
+          acs <- pmax(acs,-1) # restrict to [-1;1]
+          res[good,"acs"] <- acs
+        }
       }
     }
   }
