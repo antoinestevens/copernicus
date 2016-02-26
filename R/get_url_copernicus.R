@@ -28,8 +28,8 @@ get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER"
     check_version = FALSE) {
 
     product <- match.arg(product)
-    collection <- c("Dynamics/LAI_V1/", "Dynamics/FCOVER_V1/", "Dynamics/FAPAR_V1/", "Indices/NDVI_V1/",
-        "Indices/NDVI_V2/", "Indices/VCI_V1/", "Indices/VPI_V1/", "BIOMASS/DMP_V1/", "Fire_Disturbance/BA_V1/")
+    collection <- c("Properties/LAI_V1/", "Properties/FCOVER_V1/", "Properties/FAPAR_V1/", "Indicators/NDVI_V1/",
+                    "Indicators/NDVI_V2/", "Indicators/VCI_V1/", "Indicators/VPI_V1/", "Biomass/DMP_V1/", "Fire_Disturbance/BA_V1/")
 
     url <- paste0(server, stringr::str_subset(collection, product))
 
