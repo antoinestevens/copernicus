@@ -27,11 +27,17 @@ check_time_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOV
     if (length(begin) != 1 | length(end) != 1)
         stop("'begin' and 'end' should be of length 1")
 
-    if (!lubridate::is.Date(begin))
-        begin <- as.Date(lubridate::parse_date_time(begin, orders = c("ymd", "yj")))
+    if (!lubridate::is.Date(begin)){
+        begin <- as.Date(lubridate::parse_date_time(begin, orders = c("ymd", "yj"), quiet = TRUE))
+        if (is.na(begin))
+          stop("'begin' is not a valid date")
+    }
 
-    if (!lubridate::is.Date(end))
-        end <- as.Date(lubridate::parse_date_time(end, orders = c("ymd", "yj")))
+    if (!lubridate::is.Date(end)){
+        end <- as.Date(lubridate::parse_date_time(end, orders = c("ymd", "yj"), quiet = TRUE))
+        if (is.na(end))
+          stop("'end' is not a valid date")
+    }
 
     b <- c(NDVI_V1 = "12/1998", NDVI_V2 = "01/2013", LAI = "12/1998", FCOVER = "12/1998", FAPAR = "12/1998",
         VCI = "01/2013", VPI = "01/2013", DMP = "01/2013", BA = "04/1999")  # begin dates for each product

@@ -33,11 +33,17 @@ get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER"
 
     url <- paste0(server, stringr::str_subset(collection, product))
 
-    if (!lubridate::is.Date(begin))
-        begin <- as.Date(lubridate::parse_date_time(begin, orders = c("ymd", "ymj")))
+    if (!lubridate::is.Date(begin)){
+        begin <- as.Date(lubridate::parse_date_time(begin, orders = c("ymd", "ymj"), quiet = TRUE))
+        if (is.na(begin))
+          stop("'begin' is not a valid date")
+    }
 
-    if (!lubridate::is.Date(end))
-        end <- as.Date(lubridate::parse_date_time(end, orders = c("ymd", "ymj")))
+    if (!lubridate::is.Date(end)){
+        end <- as.Date(lubridate::parse_date_time(end, orders = c("ymd", "ymj"), quiet = TRUE))
+        if (is.na(end))
+          stop("'end' is not a valid date")
+    }
 
     be <- begin %--% end # time interval
 
