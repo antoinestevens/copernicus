@@ -28,8 +28,8 @@ get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER"
     check_version = FALSE) {
 
     product <- match.arg(product)
-    collection <- c("Properties/LAI_V1/", "Properties/FCOVER_V1/", "Properties/FAPAR_V1/", "Indicators/NDVI_V1/",
-                    "Indicators/NDVI_V2/", "Indicators/VCI_V1/", "Indicators/VPI_V1/", "Biomass/DMP_V1/", "Fire_Disturbance/BA_V1/")
+    collection <- c("Properties/LAI_V1/", "Properties/FCOVER_V1/", "Properties/FAPAR_V1/", "Indicators/NDVI_1km_V1/",
+                    "Indicators/NDVI_1km_V2/", "Indicators/VCI_V1/", "Indicators/VPI_V1/", "Biomass/DMP_V1/", "Fire_Disturbance/BA_V1/")
 
     url <- paste0(server, stringr::str_subset(collection, product))
 
@@ -77,6 +77,7 @@ get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER"
     } else {
         d <- c(1, 11, 21)
         lubridate::mday(ym) <- d
+        d <- day(ym)
         if (product == "BA") {
             sensor <- ifelse(ym < as.Date(lubridate::ymd("20140401")), "VGT", "PROBAV")  # change in the sensor since April 2014 for BA
             if (check_version)
@@ -84,7 +85,7 @@ get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER"
             version <- ifelse(ym < as.Date(lubridate::ymd("20140401")), v[1], v[2])
             ym <- ym + 9  # there is a 9 days lag for BA products
         } else {
-            sensor <- ifelse(ym < as.Date(lubridate::ymd("20140101")), "VGT", "PROBAV")  # change in the sensor since Jan 2014
+            sensor <- ifelse(ym < as.Date(lubridate::ymd("20140601")), "VGT", "PROBAV")  # change in the sensor since Jan 2014
             if (check_version) {
                 version <- check_version_copernicus(product)[1]
                 version <- rep(version,length(ym))
