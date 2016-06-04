@@ -3,7 +3,7 @@
 #' Get COPERNICUS url's for a given product, tile, and period of time
 #' @usage
 #' get_url_copernicus(product,begin,end,tileH,tileV,groupByDate,server,check_version = FALSE)
-#' @param product one of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
+#' @param product one of the following: 'NDVI_1km_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_1km_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 #' 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 #' 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)
 #' @param begin begin of the time serie. \code{Date} object, \code{numeric} or \code{character} of length 1 that can be transformed to a \code{Date} using \code{\link[lubridate]{ymd}}. See \code{?ymd} for more details. \code{ymj} format is also accepted (with \code{j} being the day of the year)
@@ -23,7 +23,7 @@
 #' get_url_copernicus(product = 'NDVI_V2',begin = '20130101', end = '20130131',
 #'                    tileH = 19:20, tileV = 3:4)
 #' @export
-get_url_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR",
+get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", "FCOVER", "FAPAR",
     "VCI", "VPI", "DMP", "BA"), begin, end, tileH, tileV, groupByDate = FALSE, server = copernicus_options("server"),
     check_version = FALSE) {
 
