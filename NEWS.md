@@ -1,6 +1,9 @@
 TODO: 
   - wrapper around `extract_copernicus` and `download_copernicus` 
   - allow different output format
+  
+copernicus 0.3.1 (06-05-2016)
+  Changes due to NDVI products names
 
 copernicus 0.3.0 (28-09-2015)
   add `compare_raster_time` and `compare_raster_space` functions
