@@ -426,8 +426,8 @@ compare_raster_space <- function(x,y,lc,
   if(any(stats %in% c("atime_x","btime_x"))){
     ## add 1 for a model with an intercept
     z <- cbind(1, (z - min(z))/365.25) # to get yearly coeff
-    abx <-  t(apply(x[goodx,],1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
-    aby <-  t(apply(y[goody,],1,function(y){ia <- !is.na(y);lm.fit(y = y[ia],x=z[ia,])$coefficient}))
+    abx <-  t(apply(x[goodx,],1,function(y){ia <- !is.na(y);stats::lm.fit(y = y[ia],x=z[ia,])$coefficient}))
+    aby <-  t(apply(y[goody,],1,function(y){ia <- !is.na(y);stats::lm.fit(y = y[ia],x=z[ia,])$coefficient}))
     if("atime_x" %in% stats){
       if(length(abx))
         res[goodx,"atime_x"] <- abx[,1]
