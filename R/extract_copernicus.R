@@ -31,8 +31,8 @@
 #' # Don't forget to provide in copernicus_options() your user and password details
 #' # for COPERNICUS data portal before running this
 #' # e.g. : copernicus_options(user = "Smith", password = "hello")
-#' # First, get data: NDVI_V1, for JAN 2009
-#' fn <- download_copernicus(product = 'NDVI_V1', begin = '2009-01-01', end = '2009-01-31',
+#' # First, get data: NDVI_1km_V1, for JAN 2009
+#' fn <- download_copernicus(product = 'NDVI_1km_V1', begin = '2009-01-01', end = '2009-01-31',
 #'                      tileH = 19, tileV = 4)
 #' fn # downloaded file names
 #' # extract layers 1,2,3 of the downladed file. Store images in the 'H19V4' folder
@@ -187,7 +187,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                     folder <- finfo[, "date"]
                     f_h5 <- extension(f, ".h5")
                     if(i==1)
-                    unzip(f, files = paste0(folder, "/", basename(f_h5)), 
+                    unzip(f, files = paste0(folder, "/", basename(f_h5)),
                           exdir = sub("/$|\\\\$", "", outPath),junkpaths = T)
                 } else {
                     f_h5 <- f
@@ -366,7 +366,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
             # website: eg: http://land.copernicus.eu/global/products/ndvi?qt-ndvi_characteristics=5 The
             # physical values (PV) can be derived from the digital number (DN) using the relation: PV =
             # Scaling * DN + Offset biophy_range <- data_frame(product =
-            # c('LAI','FAPAR','FCOVER','NDVI_V1','NDVI_V2','VPI','VCI','DMP'), min =
+            # c('LAI','FAPAR','FCOVER','NDVI_1km_V1','NDVI_1km_V2','VPI','VCI','DMP'), min =
             # c(0,0,0,-.1,-.08,0,-.125,0), max = c(7, .94, 1, .9,.92,100,1.125,327.67), maxDN =
             # c(210,235,250,250,250,210,250,32767), scaling =
             # c(1/30,1/250,1/250,1/250,1/250,1/2,0.005,0.01), offset = c(0,0,0,25,-.08,-5,0.125,0))

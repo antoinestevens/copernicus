@@ -4,7 +4,7 @@
 #' Check whether a COPERNICUS product is availabe within a given time period
 #' @usage
 #' check_time_copernicus(product,begin,end)
-#' @param product one of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
+#' @param product one of the following: 'NDVI_1km_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_1km_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 #' 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 #' 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)
 #' @param begin begin of the time period. \code{Date} object, \code{numeric} or \code{character} of length 1 that can be transformed to a \code{Date} using \code{\link[lubridate]{ymd}}. See \code{?lubridate::ymd} for more details. \code{ymj} format is also accepted (with \code{j} being the day of the year)
@@ -13,14 +13,14 @@
 #' @author Antoine Stevens
 #' @examples
 #' # Check data availability for NDVI V1, between 01-01-2010 and 31-12-2014
-#' check_time_copernicus('NDVI_V1',20100101,20141231)
+#' check_time_copernicus('NDVI_1km_V1',20100101,20141231)
 #' # Check data availability for NDVI V2, between 01-01-2010 and 31-12-2014
 #' # using different date formats
-#' check_time_copernicus('NDVI_V2','2010001','2014365')
-#' check_time_copernicus('NDVI_V2','2010-01-01','2014-12-31')
+#' check_time_copernicus('NDVI_1km_V2','2010001','2014365')
+#' check_time_copernicus('NDVI_1km_V2','2010-01-01','2014-12-31')
 #'
 #' @export
-check_time_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOVER", "FAPAR",
+check_time_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", "FCOVER", "FAPAR",
     "VCI", "VPI", "DMP", "BA"), begin, end) {
 
     product <- match.arg(product)
@@ -39,9 +39,9 @@ check_time_copernicus <- function(product = c("NDVI_V1", "NDVI_V2", "LAI", "FCOV
           stop("'end' is not a valid date")
     }
 
-    b <- c(NDVI_V1 = "12/1998", NDVI_V2 = "01/2013", LAI = "12/1998", FCOVER = "12/1998", FAPAR = "12/1998",
+    b <- c(NDVI_1km_V1 = "12/1998", NDVI_1km_V2 = "01/2013", LAI = "12/1998", FCOVER = "12/1998", FAPAR = "12/1998",
         VCI = "01/2013", VPI = "01/2013", DMP = "01/2013", BA = "04/1999")  # begin dates for each product
-    e <- c(NDVI_V1 = "04/2014", NDVI_V2 = "08/2015", LAI = "07/2015", FCOVER = "07/2015", FAPAR = "07/2015",
+    e <- c(NDVI_1km_V1 = "04/2014", NDVI_1kmV2 = "08/2015", LAI = "07/2015", FCOVER = "07/2015", FAPAR = "07/2015",
         VCI = "08/2015", VPI = "08/2015", DMP = "01/2013", BA = "08/2015")  # end dates for each product
 
     b <- b[product]

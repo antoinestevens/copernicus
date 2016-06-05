@@ -20,7 +20,7 @@
 #' # URL's for LAI product, for JAN 2014 and tiles (h=19,v=3) and (h=20,v=4)
 #' get_url_copernicus(product = 'LAI',begin = '20140101', end = '20140131',
 #'                    tileH = 19:20, tileV = 3:4)
-#' get_url_copernicus(product = 'NDVI_V2',begin = '20130101', end = '20130131',
+#' get_url_copernicus(product = 'NDVI_1km_V2',begin = '20130101', end = '20130131',
 #'                    tileH = 19:20, tileV = 3:4)
 #' @export
 get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", "FCOVER", "FAPAR",
@@ -49,7 +49,7 @@ get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", 
 
     # add xx days at the end and remove xx at the beginning because of a time lag for certain
     # products
-    if (product %in% c("NDVI_V1", "LAI", "FCOVER", "FAPAR")) {
+    if (product %in% c("NDVI_1km_V1", "LAI", "FCOVER", "FAPAR")) {
         begin <- begin - 18
         end <- end - 18
     } else if (product == "BA") {
@@ -63,7 +63,7 @@ get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", 
     ym <- rep(be_month, each = 3)  # there is 3 dates per month, so replicate 3 times
     y <- lubridate::year(ym)
     m <- lubridate::month(ym)
-    if (product %in% c("NDVI_V1", "LAI", "FCOVER", "FAPAR")) {
+    if (product %in% c("NDVI_1km_V1", "LAI", "FCOVER", "FAPAR")) {
         dm <- c(3, 13, 23)  # days of the months
         d <- list(`28` = dm, `29` = dm + 1, `30` = dm + 2, `31` = dm + 3)  # the sequence is different for months with 28,29,30,31 days...
         d <- unlist(d[as.character(lubridate::days_in_month(be_month))])  # computes the number of days in each month and assign the day sequences
@@ -90,7 +90,7 @@ get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", 
                 version <- check_version_copernicus(product)[1]
                 version <- rep(version,length(ym))
             } else {
-                if (product == "NDVI_V2"){
+                if (product == "NDVI_1km_V2"){
                   version <- ifelse(ym < as.Date(lubridate::ymd("20140101")), "2.0", "2.1")
                 } else{
                   version <- "1.0"
