@@ -7,7 +7,7 @@
 check_version_copernicus(product,server,user,password)
 }
 \arguments{
-\item{product}{one of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
+\item{product}{one of the following: 'NDVI_1km_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_1km_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)}
 
@@ -32,8 +32,8 @@ taking into account changes in product version after May/June 2014
 \dontrun{
 # user and password should be provided, for instance through global package options
 # ?copernicus_options
-# NDVI_V1: there is only one version of the algorithm
-check_version_copernicus('NDVI_V1')
+# NDVI_1km_V1: there is only one version of the algorithm
+check_version_copernicus('NDVI_1km_V1')
 #  LAI
 check_version_copernicus('LAI')
 }

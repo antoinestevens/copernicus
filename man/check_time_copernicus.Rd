@@ -7,7 +7,7 @@
 check_time_copernicus(product,begin,end)
 }
 \arguments{
-\item{product}{one of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
+\item{product}{one of the following: 'NDVI_1km_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_1km_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)}
 
@@ -23,11 +23,11 @@ Check whether a COPERNICUS product is availabe within a given time period
 }
 \examples{
 # Check data availability for NDVI V1, between 01-01-2010 and 31-12-2014
-check_time_copernicus('NDVI_V1',20100101,20141231)
+check_time_copernicus('NDVI_1km_V1',20100101,20141231)
 # Check data availability for NDVI V2, between 01-01-2010 and 31-12-2014
 # using different date formats
-check_time_copernicus('NDVI_V2','2010001','2014365')
-check_time_copernicus('NDVI_V2','2010-01-01','2014-12-31')
+check_time_copernicus('NDVI_1km_V2','2010001','2014365')
+check_time_copernicus('NDVI_1km_V2','2010-01-01','2014-12-31')
 
 }
 \author{

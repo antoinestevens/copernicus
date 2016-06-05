@@ -67,11 +67,11 @@ The \code{stats} arguments can take one or more of the following values (see Ji 
 # Don't forget to provide in copernicus_options() your user and password details
 # for COPERNICUS data portal before running this
 # e.g. : copernicus_options(user = "Smith", password = "hello")
-# First, get data for NDVI_V1
-fn_SPOT <- download_copernicus(product = 'NDVI_V1', begin = '2013-10-01', end = '2014-03-31',
+# First, get data for NDVI_1km_V1
+fn_SPOT <- download_copernicus(product = 'NDVI_1km_V1', begin = '2013-10-01', end = '2014-03-31',
                      tileH = 19, tileV = 4)
-# and NDVI_V2 ...
-fn_PROBA <- download_copernicus(product = 'NDVI_V2', begin = '2013-10-01', end = '2014-03-31',
+# and NDVI_1km_V2 ...
+fn_PROBA <- download_copernicus(product = 'NDVI_1km_V2', begin = '2013-10-01', end = '2014-03-31',
                      tileH = 19, tileV = 4)
 # Extract NDVI, export to tif
 f_SPOT <-extract_copernicus(fn_SPOT,job = "product_comparison",layers = 2)

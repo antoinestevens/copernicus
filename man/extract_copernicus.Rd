@@ -54,8 +54,8 @@ Un-zip, extract the given layers of COPERNICUS h5 files to tif files. The functi
 # Don't forget to provide in copernicus_options() your user and password details
 # for COPERNICUS data portal before running this
 # e.g. : copernicus_options(user = "Smith", password = "hello")
-# First, get data: NDVI_V1, for JAN 2009
-fn <- download_copernicus(product = 'NDVI_V1', begin = '2009-01-01', end = '2009-01-31',
+# First, get data: NDVI_1km_V1, for JAN 2009
+fn <- download_copernicus(product = 'NDVI_1km_V1', begin = '2009-01-01', end = '2009-01-31',
                      tileH = 19, tileV = 4)
 fn # downloaded file names
 # extract layers 1,2,3 of the downladed file. Store images in the 'H19V4' folder

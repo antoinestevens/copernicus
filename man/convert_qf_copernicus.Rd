@@ -30,8 +30,8 @@ Convert a Raster* object representing QFLAG bit values to a Raster* with two cat
 \dontrun{
 # Don't forget to provide in copernicus_options() your user and password details
 # for COPERNICUS data portal before running this
-# First, get data: NDVI_V1, for JAN 2009
-fn <- get_copernicus(product = 'NDVI_V1', begin = '2009-01-01', end = '2009-31-01',
+# First, get data: NDVI_1kmV1, for JAN 2009
+fn <- get_copernicus(product = 'NDVI_1kmV1', begin = '2009-01-01', end = '2009-31-01',
                      tileH = 19, tileV = 4)
 fn # downloaded file names
 # extract layers 3 (QFLAG) of the downladed file. Store images in the 'H19V4' folder

@@ -8,7 +8,7 @@ download_copernicus(product,begin,end,extent,tileH,tileV,
                     outPath,user,password,ntry,allowParallel = FALSE,...)
 }
 \arguments{
-\item{product}{One of the following: 'NDVI_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
+\item{product}{One of the following: 'NDVI_1km_V1' (Normalized Difference Vegetation Index - VGT instrument),'NDVI_1km_V2' (Normalized Difference Vegetation Index - PROBAV instrument),'LAI' (Leaf Area Index),'FCOVER' (Fraction of Vegetation Green Cover),
 'FAPAR' (Fraction of Absorbed Photosynthetically Active Radiation),'VCI' (Vegetation Condition Index),'VPI' (Vegetation Productivity Index),
 'DMP' (Dry Matter Productivity),'BA' (Burnt Areas)}
 
@@ -50,13 +50,13 @@ One should choose to use either an extent or pairs of (H,V) values. If extent is
 # Don't forget to provide in copernicus_options() your user and password
 # for COPERNICUS data portal before running this
 # Let's download NDVI V1 prodct, for JUN 2009, and tile (h=19,v=4)
-download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31',
+download_copernicus(product = 'NDVI_1km_V1', begin = '2009-06-01', end = '2009-06-30',
                    tileH = 19, tileV = 4)
 # one could also use an extent object, instead of (tileH,tileV) pairs, eg:
 library(raster)
 e <- extent(c(-1,2,49,51))
 # this will download 12 files (4 tiles x 3 time periods)
-download_copernicus(product = 'NDVI_V1', begin = '2009-06-01', end = '2009-06-31', extent = e)
+download_copernicus(product = 'NDVI_1km_V1', begin = '2009-06-01', end = '2009-06-30', extent = e)
 }
 
 }
