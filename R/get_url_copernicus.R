@@ -77,7 +77,7 @@ get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", 
     } else {
         d <- c(1, 11, 21)
         lubridate::mday(ym) <- d
-        d <- day(ym)
+        d <- lubridate::day(ym)
         if (product == "BA") {
             sensor <- ifelse(ym < as.Date(lubridate::ymd("20140401")), "VGT", "PROBAV")  # change in the sensor since April 2014 for BA
             if (check_version)
