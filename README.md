@@ -54,4 +54,5 @@ Some of the package default options are set with `copernicus_options`, such as t
 
 TODO:
  - wrapper around `download_copernicus` and `extract_copernicus`
+ - check file download integrity
  - allow different output format
