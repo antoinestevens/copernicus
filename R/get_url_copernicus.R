@@ -85,7 +85,7 @@ get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", 
             version <- ifelse(ym < as.Date(lubridate::ymd("20140401")), v[1], v[2])
             ym <- ym + 9  # there is a 9 days lag for BA products
         } else {
-            sensor <- ifelse(ym < as.Date(lubridate::ymd("20140601")), "VGT", "PROBAV")  # change in the sensor since Jan 2014
+            sensor <- ifelse(ym < as.Date(lubridate::ymd("20140101")), "VGT", "PROBAV")  # change in the sensor since Jan 2014
             if (check_version) {
                 version <- check_version_copernicus(product)[1]
                 version <- rep(version,length(ym))
