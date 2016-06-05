@@ -110,9 +110,9 @@ get_url_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI", 
     d <- d[id]
 
     # create product name
-    folder_name <- paste0(stringr::str_replace(product, "_V[12]", ""), "_", a, "_", sensor, "_V",
+    folder_name <- paste0(stringr::str_replace(product, "(_1km)*_V[12]", ""), "_", a, "_", sensor, "_V",
                           stringr::str_extract(version, "[12]"))
-    product_name <- paste0("g2_BIOPAR_", stringr::str_replace(product, "_V[12]", ""), "_", a, "_", "H",
+    product_name <- paste0("g2_BIOPAR_", stringr::str_replace(product, "(_1km)*_V[12]", ""), "_", a, "_", "H",
         rep(tileH, each = length(a)), "V", rep(tileV, each = length(a)), "_", sensor, "_V",
         version, ".zip")
 
