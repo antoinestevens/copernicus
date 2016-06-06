@@ -56,3 +56,5 @@ TODO:
  - wrapper around `download_copernicus` and `extract_copernicus`
  - check file download integrity
  - allow different output format
+ - change dependency from `rhdf5` to `h5` (allows partial I/O! --> speed-up!)
+ - vignette
