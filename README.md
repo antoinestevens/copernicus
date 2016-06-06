@@ -57,4 +57,5 @@ TODO:
  - check file download integrity
  - allow different output format
  - change dependency from `rhdf5` to `h5` (allows partial I/O! --> speed-up!)
- - vignette
+ - vignette 
+ - add `verbose` arguments
