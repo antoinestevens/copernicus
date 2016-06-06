@@ -262,10 +262,12 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                     srcwin <- NULL
                 }
 
-                if(nrow(h5info) == 1)
-                  layer <- NULL # remove sd_index when there is only one layer, else gdal_translate gives an error
-                else
+                if(nrow(h5info) == 1){
+                  sd_index <- NULL # remove sd_index when there is only one layer, else gdal_translate gives an error
+                } else {
+                  sd_index <- layer
                   h5info <- h5info[layer, ]  # extract the selected layers only
+                }
 
                 att <- rhdf5::h5readAttributes(f_h5, h5info$name)
                 rhdf5::H5close()
@@ -280,7 +282,7 @@ extract_copernicus <- function(fnames, extent, extend, convertDN = TRUE, outProj
                 dst_dataset <- extension(rasterTmpFile(),"tif")
                 # http://land.copernicus.eu/global/faq/how-convert-swi-hdf5-data-geotiff
 
-                args_to_gdal <- list(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = layer,
+                args_to_gdal <- list(src_dataset = f_h5, dst_dataset = dst_dataset, sd_index = sd_index,
                                      srcwin = srcwin, a_ullr = e_proj[c(1, 4, 3, 2)], a_srs = "+init=epsg:32662",
                                      a_nodate = as.numeric(att$MISSING_VALUE))
 
