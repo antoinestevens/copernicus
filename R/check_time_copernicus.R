@@ -39,9 +39,9 @@ check_time_copernicus <- function(product = c("NDVI_1km_V1", "NDVI_1km_V2", "LAI
           stop("'end' is not a valid date")
     }
 
-    b <- c(NDVI_1km_V1 = "12/1998", NDVI_1km_V2 = "01/2013", LAI = "04/2022", FCOVER = "12/1998", FAPAR = "12/1998",
+    b <- c(NDVI_1km_V1 = "12/1998", NDVI_1km_V2 = "01/2013", LAI = "12/1998", FCOVER = "12/1998", FAPAR = "12/1998",
         VCI = "01/2013", VPI = "01/2013", DMP = "01/2013", BA = "04/1999")  # begin dates for each product
-    e <- c(NDVI_1km_V1 = "04/2014", NDVI_1km_V2 = "08/2015", LAI = "07/2015", FCOVER = "07/2015", FAPAR = "07/2015",
+    e <- c(NDVI_1km_V1 = "04/2014", NDVI_1km_V2 = "08/2015", LAI = "04/2022", FCOVER = "07/2015", FAPAR = "07/2015",
         VCI = "08/2015", VPI = "08/2015", DMP = "01/2013", BA = "08/2015")  # end dates for each product
 
     b <- b[product]
